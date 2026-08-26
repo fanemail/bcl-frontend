@@ -1,0 +1,19 @@
+﻿# Development backups
+*.backup
+*.bak
+*.tmp
+*.p5-*-backup
+
+# Archives
+*.zip
+
+# OS / editor files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Secrets / local environment
+.env
+.env.*
+*.secret

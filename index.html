@@ -1,0 +1,272 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BCL</title>
+  <link rel="stylesheet" href="css/main.css">
+</head>
+
+<body>
+  <section
+    id="profileSetup"
+    class="profile-setup"
+    aria-labelledby="profileSetupTitle"
+    hidden
+  >
+    <div class="profile-setup-card">
+      <p class="profile-setup-eyebrow">Learning Profile</p>
+
+      <h2 id="profileSetupTitle">
+        Set up BCL
+      </h2>
+
+      <p class="profile-setup-intro">
+        Choose the language you want to learn and your current level.
+      </p>
+
+      <label class="profile-field">
+        <span>Learn</span>
+
+        <select id="profileTargetLanguage">
+          <option value="en">English</option>
+          <option value="ja">Japanese</option>
+        </select>
+      </label>
+
+      <label class="profile-field">
+        <span>Level</span>
+
+        <select id="profileLearningLevel"></select>
+      </label>
+
+      <button
+        id="profileStartButton"
+        class="profile-start-button"
+        type="button"
+      >
+        Start BCL
+      </button>
+
+      <p
+        id="profileSetupError"
+        class="profile-setup-error"
+        role="alert"
+        hidden
+      ></p>
+    </div>
+  </section>
+
+  <main class="app-shell" aria-label="BCL language learning conversation">
+
+    <header class="app-header">
+      <div>
+        <h1 class="product-name">BCL</h1>
+        <p class="product-subtitle">Natural Conversation + English Learning</p>
+      </div>
+    </header>
+
+    <section class="chat-region" aria-label="Conversation">
+
+      <div id="messageList" class="message-list" tabindex="0">
+
+        <article class="message message-user">
+          <div class="message-meta">
+            <span class="speaker-label">You</span>
+          </div>
+
+          <div class="message-body">
+            Yesterday I went hiking for seven hours. We climbed about
+            1,000 meters, so I was completely exhausted when I got home.
+          </div>
+        </article>
+
+        <article class="message message-ai">
+          <div class="message-meta">
+            <span class="speaker-label">BCL</span>
+            <span class="mode-label">Conversation</span>
+          </div>
+
+          <div class="message-body">
+            <p>
+              That sounds exhausting, but also really rewarding.
+              Seven hours is a long hike, especially with a 1,000-meter climb.
+              I hope you had enough water and took a good rest afterward.
+            </p>
+
+            <button
+              class="playback-button"
+              type="button"
+              aria-label="English playback placeholder; audio is not available yet"
+              disabled
+            >
+              <span aria-hidden="true">▶</span>
+              <span>Playback</span>
+            </button>
+          </div>
+        </article>
+
+        <article class="message message-ai message-teaching">
+          <div class="message-meta">
+            <span class="speaker-label">BCL</span>
+            <span class="mode-label">Teaching</span>
+          </div>
+
+          <div class="message-body">
+            <p>
+              <strong>try to</strong> 表示「努力去做」，重點在嘗試或付出努力；
+              <strong>want to</strong> 只表示「想做」。
+            </p>
+
+            <div class="learning-example">
+              <span class="example-label">Example</span>
+              <p lang="en">
+                I tried to open the door, but it was locked.
+              </p>
+
+              <button
+                class="playback-button"
+                type="button"
+                aria-label="Example sentence playback placeholder; audio is not available yet"
+                disabled
+              >
+                <span aria-hidden="true">▶</span>
+                <span>Playback</span>
+              </button>
+            </div>
+          </div>
+        </article>
+
+        <div
+          id="loadingState"
+          class="status-message status-loading"
+          role="status"
+          aria-live="polite"
+          hidden
+        >
+          AI is thinking...
+        </div>
+
+        <div
+          id="errorState"
+          class="status-message status-error"
+          role="alert"
+          hidden
+        >
+          Something went wrong. Please try again.
+        </div>
+
+      </div>
+
+      <button
+        id="scrollLatestButton"
+        class="scroll-latest-button"
+        type="button"
+        aria-label="Scroll to latest message"
+      >
+        <span class="scroll-arrow" aria-hidden="true">&#8595;</span>
+      </button>
+
+    </section>
+
+    <section class="input-region" aria-label="Message input">
+
+      <div class="demo-controls" aria-label="Static UI demonstration controls">
+        <span class="demo-label">Demo states:</span>
+
+        <button id="toggleLoadingButton" class="demo-button" type="button">
+          Loading
+        </button>
+
+        <button id="toggleErrorButton" class="demo-button" type="button">
+          Error
+        </button>
+
+        <button id="toggleRecordingButton" class="demo-button" type="button">
+          Recording
+        </button>
+      </div>
+
+      <div id="recordingState" class="recording-state" hidden>
+        <span class="recording-indicator" aria-hidden="true"></span>
+        <span class="recording-label">Recording</span>
+        <span class="recording-timer">00:00</span>
+
+        <button
+          class="recording-action"
+          type="button"
+          aria-label="Cancel recording placeholder"
+        >
+          Cancel
+        </button>
+
+        <button
+          class="recording-action"
+          type="button"
+          aria-label="Stop recording placeholder"
+        >
+          Stop
+        </button>
+      </div>
+
+      <label class="sr-only" for="messageInput">
+        Message BCL
+      </label>
+
+      <div class="input-box">
+        <textarea
+          id="messageInput"
+          rows="1"
+          placeholder="Message BCL..."
+          aria-label="Message BCL"
+        ></textarea>
+
+        <div class="input-actions">
+          <button
+            id="microphoneButton"
+            class="icon-button"
+            type="button"
+            aria-label="Microphone placeholder; recording is not available yet"
+          >
+            <span aria-hidden="true">🎤</span>
+          </button>
+
+          <button
+            id="sendButton"
+            class="icon-button send-button"
+            type="button"
+            aria-label="Send placeholder; message sending is not available yet"
+          >
+            <span aria-hidden="true">➤</span>
+          </button>
+        </div>
+      </div>
+
+      <p class="placeholder-note">
+        Static interface demo  AI, sending, microphone and playback are not connected.
+      </p>
+
+    </section>
+
+  </main>
+
+    <script src="js/config/learning-profile.js"></script>
+  <script src="js/memory/reference-memory.js"></script>
+<script src="js/runtime-state.js"></script>
+  <script src="js/dispatcher.js"></script>
+  
+  <script src="js/gateway-client.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
