@@ -61,9 +61,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const errorState = document.getElementById("errorState");
   const recordingState = document.getElementById("recordingState");
 
-  const toggleLoadingButton = document.getElementById("toggleLoadingButton");
-  const toggleErrorButton = document.getElementById("toggleErrorButton");
-  const toggleRecordingButton = document.getElementById("toggleRecordingButton");
 
   const microphoneButton = document.getElementById("microphoneButton");
   const sendButton = document.getElementById("sendButton");
@@ -84,27 +81,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function scrollToLatest() {
     messageList.scrollTop = messageList.scrollHeight;
-  }
-
-  function hideDemoStates() {
-    loadingState.hidden = true;
-    errorState.hidden = true;
-    recordingState.hidden = true;
-  }
-
-  function showDemoState(element) {
-    const wasNearBottom = isNearBottom();
-    const wasVisible = !element.hidden;
-
-    hideDemoStates();
-
-    if (!wasVisible) {
-      element.hidden = false;
-
-      if (wasNearBottom) {
-        scrollToLatest();
-      }
-    }
   }
 
   function escapeHtml(value) {
@@ -746,23 +722,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   scrollLatestButton.addEventListener("click", scrollToLatest);
 
-  toggleLoadingButton.addEventListener("click", () => {
-    showDemoState(loadingState);
-  });
 
-  toggleErrorButton.addEventListener("click", () => {
-    showDemoState(errorState);
-  });
-
-  toggleRecordingButton.addEventListener("click", () => {
-    showDemoState(recordingState);
-  });
-
-  microphoneButton.addEventListener("click", () => {
-    showDemoState(recordingState);
-  });
-
-  hideDemoStates();
   scrollToLatest();
 });
 

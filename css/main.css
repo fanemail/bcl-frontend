@@ -269,20 +269,6 @@ textarea:focus-visible,
   background: var(--surface);
 }
 
-.demo-controls {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 0.4rem;
-  margin-bottom: var(--space-2);
-}
-
-.demo-label {
-  color: var(--muted-text);
-  font-size: 0.76rem;
-}
-
-.demo-button,
 .recording-action {
   min-height: 2rem;
   padding: 0.3rem 0.55rem;
@@ -293,12 +279,10 @@ textarea:focus-visible,
   font-size: 0.76rem;
 }
 
-.demo-button:hover,
 .recording-action:hover {
   background: var(--surface-soft);
 }
 
-.demo-button:active,
 .recording-action:active {
   transform: translateY(1px);
 }
@@ -400,13 +384,6 @@ textarea::placeholder {
   font-weight: 700;
 }
 
-.placeholder-note {
-  margin: 0.45rem 0 0;
-  color: var(--muted-text);
-  font-size: 0.7rem;
-  text-align: center;
-}
-
 .sr-only {
   position: absolute;
   width: 1px;
@@ -455,15 +432,6 @@ textarea::placeholder {
   .scroll-latest-button {
     right: 0.8rem;
   }
-
-  .demo-controls {
-    gap: 0.3rem;
-  }
-
-  .demo-label {
-    width: 100%;
-  }
-
   .input-box {
     gap: 0.35rem;
     padding: 0.4rem;
