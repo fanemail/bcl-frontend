@@ -578,3 +578,34 @@ textarea::placeholder {
   font-size: 0.9rem;
 }
 
+
+/* Markdown tables */
+.message-markdown table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1rem 0;
+  font-size: 0.95em;
+}
+
+.message-markdown th,
+.message-markdown td {
+  padding: 0.65rem 0.75rem;
+  border: 1px solid var(--border-strong);
+  text-align: left;
+  vertical-align: top;
+}
+
+.message-markdown th {
+  font-weight: 700;
+}
+
+.message-markdown table {
+  display: block;
+  overflow-x: auto;
+}
+
+.message-markdown thead,
+.message-markdown tbody {
+  white-space: normal;
+}
+

@@ -1,4 +1,4 @@
-﻿"use strict";
+"use strict";
 
 const { createRuntimeState } = window.BCLRuntimeState;
 const { dispatchRuntime } = window.BCLDispatcher;
@@ -108,8 +108,14 @@ document.addEventListener("DOMContentLoaded", () => {
     const lines = markdown.replace(/\r\n/g, "\n").split("\n");
     const output = [];
 
+    function unescapeMarkdownLine(line) {
+      return line.replace(/\\([#>*_=+|:-])/g, "$1");
+    }
+
     let paragraph = [];
     let codeLines = [];
+    let listItems = [];
+    let quoteLines = [];
     let inCodeBlock = false;
     let codeLanguage = "";
 
@@ -140,10 +146,110 @@ document.addEventListener("DOMContentLoaded", () => {
       codeLanguage = "";
     }
 
-    for (const line of lines) {
+    function flushList() {
+      if (listItems.length === 0) {
+        return;
+      }
+
+      output.push(
+        "<ul>" +
+          listItems
+            .map(
+              (item) =>
+                "<li>" +
+                renderInlineMarkdown(item) +
+                "</li>"
+            )
+            .join("") +
+          "</ul>"
+      );
+
+      listItems = [];
+    }
+
+    function flushQuote() {
+      if (quoteLines.length === 0) {
+        return;
+      }
+
+      output.push(
+        "<blockquote>" +
+          quoteLines
+            .map(renderInlineMarkdown)
+            .join("<br>") +
+          "</blockquote>"
+      );
+
+      quoteLines = [];
+    }
+
+    function parseTableRow(line) {
+      return line
+        .trim()
+        .replace(/^\|/, "")
+        .replace(/\|$/, "")
+        .split("|")
+        .map((cell) => cell.trim());
+    }
+
+    function isTableSeparator(line) {
+      const cells = parseTableRow(line);
+
+      return (
+        cells.length > 0 &&
+        cells.every(
+          (cell) =>
+            /^:?-{3,}:?$/.test(cell)
+        )
+      );
+    }
+
+    function renderTable(header, rows) {
+      let html = "<table><thead><tr>";
+
+      html += header
+        .map(
+          (cell) =>
+            "<th>" +
+            renderInlineMarkdown(cell) +
+            "</th>"
+        )
+        .join("");
+
+      html += "</tr></thead><tbody>";
+
+      html += rows
+        .map(
+          (row) =>
+            "<tr>" +
+            row
+              .map(
+                (cell) =>
+                  "<td>" +
+                  renderInlineMarkdown(cell) +
+                  "</td>"
+              )
+              .join("") +
+            "</tr>"
+        )
+        .join("");
+
+      html += "</tbody></table>";
+
+      return html;
+    }
+
+    function flushTextBlocks() {
+      flushParagraph();
+      flushList();
+      flushQuote();
+    }
+
+    for (let lineIndex = 0; lineIndex < lines.length; lineIndex += 1) {
+      const line = lines[lineIndex];
       if (line.startsWith("```")) {
         if (!inCodeBlock) {
-          flushParagraph();
+          flushTextBlocks();
           inCodeBlock = true;
           codeLanguage = line.slice(3).trim();
         } else {
@@ -159,22 +265,124 @@ document.addEventListener("DOMContentLoaded", () => {
         continue;
       }
 
-      if (line.trim() === "") {
-        flushParagraph();
-      } else {
-        paragraph.push(line);
+      const normalizedLine =
+        unescapeMarkdownLine(line);
+
+      if (normalizedLine.trim() === "") {
+        flushTextBlocks();
+        continue;
       }
+
+      const nextLine =
+        lineIndex + 1 < lines.length
+          ? unescapeMarkdownLine(
+              lines[lineIndex + 1]
+            )
+          : "";
+
+      if (
+        normalizedLine.includes("|") &&
+        isTableSeparator(nextLine)
+      ) {
+        flushTextBlocks();
+
+        const header =
+          parseTableRow(normalizedLine);
+
+
+        const rows = [];
+
+        let tableIndex =
+          lineIndex + 2;
+
+        while (
+          tableIndex < lines.length
+        ) {
+          const tableLine =
+            unescapeMarkdownLine(
+              lines[tableIndex]
+            );
+
+          if (
+            !tableLine.includes("|") ||
+            tableLine.trim() === ""
+          ) {
+            break;
+          }
+
+          rows.push(
+            parseTableRow(tableLine)
+          );
+
+          tableIndex += 1;
+        }
+
+        output.push(
+          renderTable(header, rows)
+        );
+
+        lineIndex = tableIndex - 1;
+        continue;
+      }
+
+      if (isTableSeparator(normalizedLine)) {
+        continue;
+      }
+
+      const headingMatch =
+        normalizedLine.match(/^(#{1,3})\s+(.+)$/);
+
+      if (headingMatch) {
+        flushTextBlocks();
+
+        const level = headingMatch[1].length;
+
+        output.push(
+          "<h" +
+            level +
+            ">" +
+            renderInlineMarkdown(headingMatch[2]) +
+            "</h" +
+            level +
+            ">"
+        );
+
+        continue;
+      }
+
+      const quoteMatch =
+        normalizedLine.match(/^>\s?(.*)$/);
+
+      if (quoteMatch) {
+        flushParagraph();
+        flushList();
+        quoteLines.push(quoteMatch[1]);
+        continue;
+      }
+
+      const listMatch =
+        normalizedLine.match(/^[-*]\s+(.+)$/);
+
+      if (listMatch) {
+        flushParagraph();
+        flushQuote();
+        listItems.push(listMatch[1]);
+        continue;
+      }
+
+      flushList();
+      flushQuote();
+      paragraph.push(normalizedLine);
     }
 
     if (inCodeBlock) {
       flushCodeBlock();
     }
 
-    flushParagraph();
+    flushTextBlocks();
 
     return output.join("");
   }
-
   function createMessageElement({
     speaker,
     type,
