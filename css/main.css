@@ -609,3 +609,27 @@ textarea::placeholder {
   white-space: normal;
 }
 
+
+/* Learning Profile entry */
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.profile-button {
+  flex: 0 0 auto;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-small);
+  background: var(--surface);
+  font: inherit;
+  font-size: 0.82rem;
+  cursor: pointer;
+}
+
+.profile-button:hover {
+  border-color: currentColor;
+}
+

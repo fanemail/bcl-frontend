@@ -27,6 +27,9 @@ document.addEventListener("DOMContentLoaded", () => {
   const profileSetup =
     document.getElementById("profileSetup");
 
+  const profileButton =
+    document.getElementById("profileButton");
+
   const profileTargetLanguage =
     document.getElementById("profileTargetLanguage");
 
@@ -334,7 +337,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       const headingMatch =
-        normalizedLine.match(/^(#{1,3})\s+(.+)$/);
+        normalizedLine.match(/^(#{1,4})\s+(.+)$/);
 
       if (headingMatch) {
         flushTextBlocks();
@@ -633,6 +636,11 @@ document.addEventListener("DOMContentLoaded", () => {
       updateLoadingState();
     }
   }
+
+  profileButton.addEventListener(
+    "click",
+    showProfileSetup
+  );
 
   profileTargetLanguage.addEventListener(
     "change",
