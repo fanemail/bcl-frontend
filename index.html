@@ -9,6 +9,51 @@
 
 <body>
   <section
+    id="accessSetup"
+    class="profile-setup"
+    aria-labelledby="accessSetupTitle"
+    hidden
+  >
+    <div class="profile-setup-card">
+      <p class="profile-setup-eyebrow">BCL Access</p>
+
+      <h2 id="accessSetupTitle">
+        Enter your access token
+      </h2>
+
+      <p>
+        Enter the BCL Access Token provided to you.
+      </p>
+
+      <label class="profile-field">
+        <span>Access Token</span>
+
+        <input
+          id="accessTokenInput"
+          type="password"
+          autocomplete="off"
+          spellcheck="false"
+        >
+      </label>
+
+      <button
+        id="accessStartButton"
+        class="profile-start-button"
+        type="button"
+      >
+        Enter BCL
+      </button>
+
+      <p
+        id="accessSetupError"
+        class="profile-setup-error"
+        role="alert"
+        hidden
+      ></p>
+    </div>
+  </section>
+
+  <section
     id="profileSetup"
     class="profile-setup"
     aria-labelledby="profileSetupTitle"

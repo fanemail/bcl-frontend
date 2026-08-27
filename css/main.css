@@ -1,4 +1,4 @@
-﻿:root {
+:root {
   --background: #f4f5f7;
   --surface: #ffffff;
   --surface-soft: #f8f9fa;
@@ -551,7 +551,8 @@ textarea::placeholder {
   font-weight: 600;
 }
 
-.profile-field select {
+.profile-field select,
+.profile-field input {
   width: 100%;
   min-height: 2.7rem;
   padding: 0.55rem 0.7rem;

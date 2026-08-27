@@ -1,7 +1,44 @@
-﻿"use strict";
+"use strict";
 
 (function () {
   let gatewayUrl = "";
+
+  const ACCESS_TOKEN_STORAGE_KEY =
+    "bcl.accessToken";
+
+  function setAccessToken(token) {
+    if (typeof token !== "string") {
+      throw new Error("BCL access token must be a string.");
+    }
+
+    const normalizedToken = token.trim();
+
+    if (!normalizedToken) {
+      throw new Error("BCL access token is required.");
+    }
+
+    localStorage.setItem(
+      ACCESS_TOKEN_STORAGE_KEY,
+      normalizedToken
+    );
+  }
+
+  function getAccessToken() {
+    const token =
+      localStorage.getItem(
+        ACCESS_TOKEN_STORAGE_KEY
+      );
+
+    return typeof token === "string"
+      ? token.trim()
+      : "";
+  }
+
+  function clearAccessToken() {
+    localStorage.removeItem(
+      ACCESS_TOKEN_STORAGE_KEY
+    );
+  }
 
   function setGatewayUrl(url) {
     if (typeof url !== "string") {
@@ -22,13 +59,21 @@
       );
     }
 
+    const accessToken = getAccessToken();
+
+    const headers = {
+      "Content-Type": "application/json"
+    };
+
+    if (accessToken) {
+      headers["X-BCL-Access-Token"] = accessToken;
+    }
+
     const response = await fetch(
       gatewayUrl,
       {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
+        headers,
         body: JSON.stringify(runtimeRequest)
       }
     );
@@ -71,6 +116,9 @@
   window.BCLGatewayClient = {
     setGatewayUrl,
     getGatewayUrl,
+    setAccessToken,
+    getAccessToken,
+    clearAccessToken,
     sendRuntimeRequest
   };
 })();

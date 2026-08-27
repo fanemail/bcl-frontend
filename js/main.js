@@ -13,6 +13,9 @@ const {
 } = window.BCLReferenceMemory;
 const {
   setGatewayUrl,
+  setAccessToken,
+  getAccessToken,
+  clearAccessToken,
   sendRuntimeRequest
 } = window.BCLGatewayClient;
 
@@ -23,6 +26,18 @@ setGatewayUrl(
 document.addEventListener("DOMContentLoaded", () => {
   const messageList = document.getElementById("messageList");
   const scrollLatestButton = document.getElementById("scrollLatestButton");
+
+  const accessSetup =
+    document.getElementById("accessSetup");
+
+  const accessTokenInput =
+    document.getElementById("accessTokenInput");
+
+  const accessStartButton =
+    document.getElementById("accessStartButton");
+
+  const accessSetupError =
+    document.getElementById("accessSetupError");
 
   const profileSetup =
     document.getElementById("profileSetup");
@@ -485,6 +500,44 @@ document.addEventListener("DOMContentLoaded", () => {
         : "B2";
   }
 
+  function showAccessSetup() {
+    accessSetup.hidden = false;
+    accessSetupError.hidden = true;
+    accessSetupError.textContent = "";
+    accessTokenInput.focus();
+  }
+
+  function hideAccessSetup() {
+    accessSetup.hidden = true;
+    accessSetupError.hidden = true;
+    accessSetupError.textContent = "";
+  }
+
+  function initializeAccessSetup() {
+    if (getAccessToken()) {
+      initializeProfileSetup();
+      return;
+    }
+
+    showAccessSetup();
+  }
+
+  function saveAccessSetup() {
+    try {
+      setAccessToken(accessTokenInput.value);
+
+      accessTokenInput.value = "";
+
+      hideAccessSetup();
+      initializeProfileSetup();
+    } catch (error) {
+      accessSetupError.textContent =
+        error.message;
+
+      accessSetupError.hidden = false;
+    }
+  }
+
   function showProfileSetup() {
     updateProfileLevelOptions();
     profileSetup.hidden = false;
@@ -618,6 +671,12 @@ document.addEventListener("DOMContentLoaded", () => {
         gatewayResponse.content
       );
     } catch (error) {
+      if (error.message === "Unauthorized.") {
+        clearAccessToken();
+        showAccessSetup();
+        return;
+      }
+
       appendMessage({
         speaker: "BCL",
         type: "ai",
@@ -637,6 +696,23 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
+  accessStartButton.addEventListener(
+    "click",
+    saveAccessSetup
+  );
+
+  accessTokenInput.addEventListener(
+    "keydown",
+    (event) => {
+      if (event.key !== "Enter") {
+        return;
+      }
+
+      event.preventDefault();
+      saveAccessSetup();
+    }
+  );
+
   profileButton.addEventListener(
     "click",
     showProfileSetup
@@ -652,7 +728,7 @@ document.addEventListener("DOMContentLoaded", () => {
     saveProfileSetup
   );
 
-  initializeProfileSetup();
+  initializeAccessSetup();
   sendButton.addEventListener("click", submitMessage);
 
   messageInput.addEventListener("keydown", (event) => {
