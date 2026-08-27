@@ -6,7 +6,11 @@ const {
   getActiveLearningProfile,
   setActiveLearningProfile
 } = window.BCLLearningProfile;
-const { buildSelectedContext } = window.BCLReferenceMemory;
+const {
+  getReferenceMemory,
+  updateReferenceMemory,
+  buildSelectedContext
+} = window.BCLReferenceMemory;
 const {
   setGatewayUrl,
   sendRuntimeRequest
@@ -530,6 +534,23 @@ document.addEventListener("DOMContentLoaded", () => {
       profileSetupError.hidden = false;
     }
   }
+  function rememberSuccessfulTurn(
+    userContent,
+    assistantContent
+  ) {
+    const memory = getReferenceMemory();
+
+    const recentTurns = [
+      ...memory.recentTurns,
+      "User: " + userContent.trim(),
+      "BCL: " + assistantContent.trim()
+    ];
+
+    updateReferenceMemory({
+      recentTurns: recentTurns.slice(-6)
+    });
+  }
+
   async function submitMessage() {
     const rawValue = messageInput.value;
 
@@ -588,6 +609,11 @@ document.addEventListener("DOMContentLoaded", () => {
         content: gatewayResponse.content,
         markdown: true
       });
+
+      rememberSuccessfulTurn(
+        rawValue,
+        gatewayResponse.content
+      );
     } catch (error) {
       appendMessage({
         speaker: "BCL",
