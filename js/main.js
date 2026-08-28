@@ -19,6 +19,9 @@ const {
   sendRuntimeRequest
 } = window.BCLGatewayClient;
 
+const { parseGatewayResponse } =
+  window.BCLResponseParser;
+
 setGatewayUrl(
   "https://bcl-api-gateway.fanemailyoutoo.workers.dev"
 );
@@ -631,6 +634,12 @@ document.addEventListener("DOMContentLoaded", () => {
       const gatewayResponse =
         await sendRuntimeRequest(runtimeRequest);
 
+      const parsedResponse =
+        parseGatewayResponse(
+          gatewayResponse,
+          runtimeContext.runtime
+        );
+
       appendMessage({
         speaker: "BCL",
         type: "ai",
@@ -638,13 +647,13 @@ document.addEventListener("DOMContentLoaded", () => {
           runtimeContext.runtime === "teaching"
             ? "Teaching Runtime"
             : "Conversation Runtime",
-        content: gatewayResponse.content,
+        content: parsedResponse.displayContent,
         markdown: true
       });
 
       rememberSuccessfulTurn(
         rawValue,
-        gatewayResponse.content
+        parsedResponse.displayContent
       );
     } catch (error) {
       if (error.message === "Unauthorized.") {
