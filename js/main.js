@@ -25,6 +25,9 @@ const { parseGatewayResponse } =
 const { createVoicePlan } =
   window.BCLVoiceController;
 
+const { speak: speakLocal, stop: stopLocal } =
+  window.BCLLocalTTS;
+
 setGatewayUrl(
   "https://bcl-api-gateway.fanemailyoutoo.workers.dev"
 );
@@ -468,10 +471,44 @@ document.addEventListener("DOMContentLoaded", () => {
             const button = document.createElement("button");
             button.className = "voice-button";
             button.type = "button";
-            button.disabled = true;
+            button.disabled = item.renderer !== "local";
             button.dataset.speechId = item.id;
             button.dataset.voiceRenderer = item.renderer;
             button.textContent = "Play";
+
+            if (item.renderer === "local") {
+              button.addEventListener("click", () => {
+                if (button.dataset.playing === "true") {
+                  stopLocal();
+                  button.dataset.playing = "false";
+                  button.textContent = "Play";
+                  return;
+                }
+
+                try {
+                  speakLocal({
+                    text: item.text,
+                    targetLanguage: item.targetLanguage,
+                    onStart: () => {
+                      button.dataset.playing = "true";
+                      button.textContent = "Stop";
+                    },
+                    onEnd: () => {
+                      button.dataset.playing = "false";
+                      button.textContent = "Play";
+                    },
+                    onError: () => {
+                      button.dataset.playing = "false";
+                      button.textContent = "Play";
+                    }
+                  });
+                } catch (error) {
+                  button.dataset.playing = "false";
+                  button.textContent = "Play";
+                  console.error("Local TTS failed:", error);
+                }
+              });
+            }
 
             const text = document.createElement("span");
             text.className = "speech-item-text";
