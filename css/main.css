@@ -601,4 +601,47 @@ textarea::placeholder {
 .profile-button:hover {
   border-color: currentColor;
 }
+/* P7-06C Voice Foundation */
+.voice-region {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(127, 127, 127, 0.25);
+}
 
+.speech-items {
+  display: grid;
+  gap: 8px;
+}
+
+.speech-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.voice-button {
+  flex: 0 0 auto;
+  min-height: 2rem;
+  padding: 0.3rem 0.55rem;
+  border: 1px solid rgba(127, 127, 127, 0.35);
+  border-radius: 8px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 0.78rem;
+}
+
+.voice-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.speech-item-text {
+  min-width: 0;
+  padding-top: 0.22rem;
+  overflow-wrap: anywhere;
+}
+
+.voice-button-conversation {
+  min-width: auto;
+}

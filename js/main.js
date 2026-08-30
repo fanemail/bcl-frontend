@@ -22,6 +22,9 @@ const {
 const { parseGatewayResponse } =
   window.BCLResponseParser;
 
+const { createVoicePlan } =
+  window.BCLVoiceController;
+
 setGatewayUrl(
   "https://bcl-api-gateway.fanemailyoutoo.workers.dev"
 );
@@ -389,7 +392,10 @@ document.addEventListener("DOMContentLoaded", () => {
     type,
     content,
     markdown = false,
-    mode = null
+    mode = null,
+    runtimeMode = null,
+    speechSegments = [],
+    targetLanguage = ""
   }) {
     const article = document.createElement("article");
 
@@ -426,6 +432,66 @@ document.addEventListener("DOMContentLoaded", () => {
 
     article.appendChild(meta);
     article.appendChild(body);
+
+    if (type === "ai" && runtimeMode) {
+      const voicePlan = createVoicePlan({
+        mode: runtimeMode,
+        targetLanguage,
+        speechSegments
+      });
+
+      if (voicePlan.length > 0) {
+        const voiceRegion = document.createElement("div");
+        voiceRegion.className = "voice-region";
+
+        if (runtimeMode === "conversation") {
+          const item = voicePlan[0];
+          const button = document.createElement("button");
+
+          button.className =
+            "voice-button voice-button-conversation";
+          button.type = "button";
+          button.disabled = true;
+          button.dataset.speechId = item.id;
+          button.dataset.voiceRenderer = item.renderer;
+          button.textContent = "Voice";
+
+          voiceRegion.appendChild(button);
+        } else {
+          const list = document.createElement("div");
+          list.className = "speech-items";
+
+          for (const item of voicePlan) {
+            const row = document.createElement("div");
+            row.className = "speech-item";
+
+            const button = document.createElement("button");
+            button.className = "voice-button";
+            button.type = "button";
+            button.disabled = true;
+            button.dataset.speechId = item.id;
+            button.dataset.voiceRenderer = item.renderer;
+            button.textContent = "Play";
+
+            const text = document.createElement("span");
+            text.className = "speech-item-text";
+            text.textContent = item.text;
+
+            if (item.targetLanguage) {
+              text.lang = item.targetLanguage;
+            }
+
+            row.appendChild(button);
+            row.appendChild(text);
+            list.appendChild(row);
+          }
+
+          voiceRegion.appendChild(list);
+        }
+
+        body.appendChild(voiceRegion);
+      }
+    }
 
     return article;
   }
@@ -648,7 +714,10 @@ document.addEventListener("DOMContentLoaded", () => {
             ? "Teaching Runtime"
             : "Conversation Runtime",
         content: parsedResponse.displayContent,
-        markdown: true
+        markdown: true,
+        runtimeMode: runtimeContext.runtime,
+        speechSegments: parsedResponse.speechSegments,
+        targetLanguage: activeProfile.targetLanguage
       });
 
       rememberSuccessfulTurn(
