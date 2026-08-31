@@ -15,6 +15,7 @@ const {
   setGatewayUrl,
   setAccessToken,
   getAccessToken,
+  getGatewayUrl,
   clearAccessToken,
   sendRuntimeRequest
 } = window.BCLGatewayClient;
@@ -27,6 +28,9 @@ const { createVoicePlan } =
 
 const { speak: speakLocal, stop: stopLocal } =
   window.BCLLocalTTS;
+
+const { play: playAI, stop: stopAI } =
+  window.BCLAITTS;
 
 setGatewayUrl(
   "https://bcl-api-gateway.fanemailyoutoo.workers.dev"
@@ -454,10 +458,49 @@ document.addEventListener("DOMContentLoaded", () => {
           button.className =
             "voice-button voice-button-conversation";
           button.type = "button";
-          button.disabled = true;
+          button.disabled = false;
           button.dataset.speechId = item.id;
           button.dataset.voiceRenderer = item.renderer;
+          button.dataset.playing = "false";
           button.textContent = "Voice";
+
+          button.addEventListener("click", async () => {
+            if (button.dataset.playing === "true") {
+              stopAI();
+              button.dataset.playing = "false";
+              button.textContent = "Voice";
+              return;
+            }
+
+            button.disabled = true;
+
+            await playAI({
+              gatewayUrl: getGatewayUrl(),
+              accessToken: getAccessToken(),
+              text: item.text,
+              targetLanguage: item.targetLanguage,
+              cacheKey: item.targetLanguage + ":" + item.text,
+              onLoading: () => {
+                button.textContent = "Loading...";
+              },
+              onPlaying: () => {
+                button.disabled = false;
+                button.dataset.playing = "true";
+                button.textContent = "Stop";
+              },
+              onEnd: () => {
+                button.disabled = false;
+                button.dataset.playing = "false";
+                button.textContent = "Voice";
+              },
+              onError: (error) => {
+                button.disabled = false;
+                button.dataset.playing = "false";
+                button.textContent = "Voice";
+                console.error("AI TTS failed:", error);
+              }
+            });
+          });
 
           voiceRegion.appendChild(button);
         } else {
