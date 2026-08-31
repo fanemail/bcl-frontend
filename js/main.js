@@ -26,11 +26,17 @@ const { parseGatewayResponse } =
 const { createVoicePlan } =
   window.BCLVoiceController;
 
-const { speak: speakLocal, stop: stopLocal } =
-  window.BCLLocalTTS;
+const {
+  speak: speakLocal, stop: stopLocal,
+  pause: pauseLocal, resume: resumeLocal,
+  replay: replayLocal, setSpeed: setLocalSpeed
+} = window.BCLLocalTTS;
 
-const { play: playAI, stop: stopAI } =
-  window.BCLAITTS;
+const {
+  play: playAI, stop: stopAI,
+  pause: pauseAI, resume: resumeAI,
+  replay: replayAI, setSpeed: setAISpeed
+} = window.BCLAITTS;
 
 setGatewayUrl(
   "https://bcl-api-gateway.fanemailyoutoo.workers.dev"
@@ -395,13 +401,146 @@ document.addEventListener("DOMContentLoaded", () => {
     return output.join("");
   }
   function resetOtherVoiceButtons(currentButton) {
-    const buttons = document.querySelectorAll(".voice-button");
+    const buttons = document.querySelectorAll(".voice-primary");
     for (const otherButton of buttons) {
       if (otherButton === currentButton) continue;
-      otherButton.disabled = false;
-      otherButton.dataset.playing = "false";
-      otherButton.textContent = otherButton.classList.contains("voice-button-conversation") ? "Voice" : "Play";
+      otherButton.dataset.state = "idle";
+      otherButton.textContent =
+        otherButton.classList.contains("voice-button-conversation")
+          ? "Voice"
+          : "Play";
     }
+  }
+
+  function createPlaybackControls({ item, conversation = false }) {
+    const controls = document.createElement("div");
+    controls.className = "playback-controls";
+
+    const primary = document.createElement("button");
+    primary.className =
+      "voice-button voice-primary" +
+      (conversation ? " voice-button-conversation" : "");
+    primary.type = "button";
+    primary.dataset.state = "idle";
+    primary.textContent = conversation ? "Voice" : "Play";
+
+    const stopButton = document.createElement("button");
+    stopButton.className = "voice-button voice-secondary";
+    stopButton.type = "button";
+    stopButton.textContent = "Stop";
+
+    const replayButton = document.createElement("button");
+    replayButton.className = "voice-button voice-secondary";
+    replayButton.type = "button";
+    replayButton.textContent = "Replay";
+
+    const speed = document.createElement("select");
+    speed.className = "voice-speed";
+    speed.setAttribute("aria-label", "Playback speed");
+    for (const value of [0.75, 1, 1.25, 1.5]) {
+      const option = document.createElement("option");
+      option.value = String(value);
+      option.textContent = value + "x";
+      if (value === 1) option.selected = true;
+      speed.appendChild(option);
+    }
+
+    const idleLabel = conversation ? "Voice" : "Play";
+    const renderer = item.renderer;
+
+    const onLoading = () => {
+      primary.dataset.state = "loading";
+      primary.textContent = "Loading...";
+    };
+    const onPlaying = () => {
+      primary.dataset.state = "playing";
+      primary.textContent = "Pause";
+    };
+    const onEnd = () => {
+      primary.dataset.state = "idle";
+      primary.textContent = idleLabel;
+    };
+    const onError = (error) => {
+      primary.dataset.state = "idle";
+      primary.textContent = idleLabel;
+      console.error("TTS failed:", error);
+    };
+
+    const playFresh = async () => {
+      resetOtherVoiceButtons(primary);
+      if (renderer === "local") {
+        stopAI();
+        setLocalSpeed(Number(speed.value));
+        try {
+          speakLocal({
+            text: item.text,
+            targetLanguage: item.targetLanguage,
+            speed: Number(speed.value),
+            onStart: onPlaying,
+            onEnd,
+            onError
+          });
+        } catch (error) {
+          onError(error);
+        }
+        return;
+      }
+
+      stopLocal();
+      setAISpeed(Number(speed.value));
+      await playAI({
+        gatewayUrl: getGatewayUrl(),
+        accessToken: getAccessToken(),
+        text: item.text,
+        targetLanguage: item.targetLanguage,
+        cacheKey: item.targetLanguage + ":" + item.type + ":" + item.text,
+        onLoading, onPlaying, onEnd, onError
+      });
+    };
+
+    primary.addEventListener("click", async () => {
+      const state = primary.dataset.state;
+      if (state === "loading") return;
+      if (state === "playing") {
+        if (renderer === "local") pauseLocal(); else pauseAI();
+        primary.dataset.state = "paused";
+        primary.textContent = "Resume";
+        return;
+      }
+      if (state === "paused") {
+        const resumed = renderer === "local"
+          ? resumeLocal()
+          : await resumeAI();
+        if (resumed !== false) {
+          primary.dataset.state = "playing";
+          primary.textContent = "Pause";
+        }
+        return;
+      }
+      await playFresh();
+    });
+
+    stopButton.addEventListener("click", () => {
+      if (renderer === "local") stopLocal(); else stopAI();
+      primary.dataset.state = "idle";
+      primary.textContent = idleLabel;
+    });
+
+    replayButton.addEventListener("click", async () => {
+      await playFresh();
+    });
+
+    speed.addEventListener("change", () => {
+      const value = Number(speed.value);
+      if (renderer === "local") setLocalSpeed(value);
+      else setAISpeed(value);
+    });
+
+    controls.appendChild(primary);
+    controls.appendChild(stopButton);
+    controls.appendChild(replayButton);
+    controls.appendChild(speed);
+    return controls;
   }
 
   function createMessageElement({
@@ -415,18 +554,14 @@ document.addEventListener("DOMContentLoaded", () => {
     targetLanguage = ""
   }) {
     const article = document.createElement("article");
-
     article.className =
-      "message " +
-      (type === "user" ? "message-user" : "message-ai");
+      "message " + (type === "user" ? "message-user" : "message-ai");
 
     const meta = document.createElement("div");
     meta.className = "message-meta";
-
     const speakerLabel = document.createElement("span");
     speakerLabel.className = "speaker-label";
     speakerLabel.textContent = speaker;
-
     meta.appendChild(speakerLabel);
 
     if (mode) {
@@ -437,15 +572,11 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     const body = document.createElement("div");
-    body.className = "message-body";
-
-    if (markdown) {
-      body.classList.add("message-markdown");
-      body.innerHTML = renderMarkdown(content);
-    } else {
-      body.classList.add("message-plain");
-      body.textContent = content;
-    }
+    body.className = markdown
+      ? "message-body message-markdown"
+      : "message-body message-plain";
+    if (markdown) body.innerHTML = renderMarkdown(content);
+    else body.textContent = content;
 
     article.appendChild(meta);
     article.appendChild(body);
@@ -462,176 +593,35 @@ document.addEventListener("DOMContentLoaded", () => {
         voiceRegion.className = "voice-region";
 
         if (runtimeMode === "conversation") {
-          const item = voicePlan[0];
-          const button = document.createElement("button");
-
-          button.className =
-            "voice-button voice-button-conversation";
-          button.type = "button";
-          button.disabled = false;
-          button.dataset.speechId = item.id;
-          button.dataset.voiceRenderer = item.renderer;
-          button.dataset.playing = "false";
-          button.textContent = "Voice";
-
-          button.addEventListener("click", async () => {
-            if (button.dataset.playing === "true") {
-              stopAI();
-              button.dataset.playing = "false";
-              button.textContent = "Voice";
-              return;
-            }
-
-            stopLocal();
-            resetOtherVoiceButtons(button);
-            button.disabled = true;
-
-            await playAI({
-              gatewayUrl: getGatewayUrl(),
-              accessToken: getAccessToken(),
-              text: item.text,
-              targetLanguage: item.targetLanguage,
-              cacheKey: item.targetLanguage + ":" + item.text,
-              onLoading: () => {
-                button.textContent = "Loading...";
-              },
-              onPlaying: () => {
-                button.disabled = false;
-                button.dataset.playing = "true";
-                button.textContent = "Stop";
-              },
-              onEnd: () => {
-                button.disabled = false;
-                button.dataset.playing = "false";
-                button.textContent = "Voice";
-              },
-              onError: (error) => {
-                button.disabled = false;
-                button.dataset.playing = "false";
-                button.textContent = "Voice";
-                console.error("AI TTS failed:", error);
-              }
-            });
-          });
-
-          voiceRegion.appendChild(button);
+          voiceRegion.appendChild(
+            createPlaybackControls({
+              item: voicePlan[0],
+              conversation: true
+            })
+          );
         } else {
           const list = document.createElement("div");
           list.className = "speech-items";
-
           for (const item of voicePlan) {
             const row = document.createElement("div");
             row.className = "speech-item";
-
-            const button = document.createElement("button");
-            button.className = "voice-button";
-            button.type = "button";
-            button.disabled = false;
-            button.dataset.speechId = item.id;
-            button.dataset.voiceRenderer = item.renderer;
-            button.dataset.playing = "false";
-            button.textContent = "Play";
-
-            if (item.renderer === "local") {
-              button.addEventListener("click", () => {
-                if (button.dataset.playing === "true") {
-                  stopLocal();
-                  button.dataset.playing = "false";
-                  button.textContent = "Play";
-                  return;
-                }
-
-                stopAI();
-                resetOtherVoiceButtons(button);
-
-                try {
-                  speakLocal({
-                    text: item.text,
-                    targetLanguage: item.targetLanguage,
-                    onStart: () => {
-                      button.dataset.playing = "true";
-                      button.textContent = "Stop";
-                    },
-                    onEnd: () => {
-                      button.dataset.playing = "false";
-                      button.textContent = "Play";
-                    },
-                    onError: () => {
-                      button.dataset.playing = "false";
-                      button.textContent = "Play";
-                    }
-                  });
-                } catch (error) {
-                  button.dataset.playing = "false";
-                  button.textContent = "Play";
-                  console.error("Local TTS failed:", error);
-                }
-              });
-            } else if (item.renderer === "ai") {
-              button.addEventListener("click", async () => {
-                if (button.dataset.playing === "true") {
-                  stopAI();
-                  button.dataset.playing = "false";
-                  button.textContent = "Play";
-                  return;
-                }
-
-                stopLocal();
-                resetOtherVoiceButtons(button);
-                button.disabled = true;
-
-                await playAI({
-                  gatewayUrl: getGatewayUrl(),
-                  accessToken: getAccessToken(),
-                  text: item.text,
-                  targetLanguage: item.targetLanguage,
-                  cacheKey: item.targetLanguage + ":" + item.type + ":" + item.text,
-                  onLoading: () => {
-                    button.textContent = "Loading...";
-                  },
-                  onPlaying: () => {
-                    button.disabled = false;
-                    button.dataset.playing = "true";
-                    button.textContent = "Stop";
-                  },
-                  onEnd: () => {
-                    button.disabled = false;
-                    button.dataset.playing = "false";
-                    button.textContent = "Play";
-                  },
-                  onError: (error) => {
-                    button.disabled = false;
-                    button.dataset.playing = "false";
-                    button.textContent = "Play";
-                    console.error("AI TTS failed:", error);
-                  }
-                });
-              });
-            }
+            row.appendChild(createPlaybackControls({item}));
 
             const text = document.createElement("span");
             text.className = "speech-item-text";
             text.textContent = item.text;
-
-            if (item.targetLanguage) {
-              text.lang = item.targetLanguage;
-            }
-
-            row.appendChild(button);
+            if (item.targetLanguage) text.lang = item.targetLanguage;
             row.appendChild(text);
             list.appendChild(row);
           }
-
           voiceRegion.appendChild(list);
         }
 
         body.appendChild(voiceRegion);
       }
     }
-
     return article;
   }
-
   function appendMessage(message) {
     const shouldScroll = isNearBottom();
     const element = createMessageElement(message);

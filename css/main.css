@@ -645,3 +645,26 @@ textarea::placeholder {
 .voice-button-conversation {
   min-width: auto;
 }
+
+/* P7-06H Playback Controls */
+.playback-controls {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex: 0 0 auto;
+}
+
+.voice-speed {
+  min-height: 2rem;
+  padding: 0.25rem 0.35rem;
+  border: 1px solid rgba(127, 127, 127, 0.35);
+  border-radius: 8px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 0.78rem;
+}
+
+.voice-secondary {
+  opacity: 0.82;
+}
