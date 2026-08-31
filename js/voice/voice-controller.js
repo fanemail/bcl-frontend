@@ -73,6 +73,7 @@
           text,
           targetLanguage: normalizedTargetLanguage,
           renderer: "ai",
+          fallbackRenderer: "local",
           playbackUnit: "response"
         });
 
@@ -86,6 +87,7 @@
           text,
           targetLanguage: normalizedTargetLanguage,
           renderer: "local",
+          fallbackRenderer: null,
           playbackUnit: "item"
         });
 
@@ -99,6 +101,7 @@
           text,
           targetLanguage: normalizedTargetLanguage,
           renderer: "ai",
+          fallbackRenderer: "local",
           playbackUnit: "item"
         });
       }

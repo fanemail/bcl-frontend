@@ -466,6 +466,30 @@ document.addEventListener("DOMContentLoaded", () => {
       console.error("TTS failed:", error);
     };
 
+    const playLocalFallback = () => {
+      if (item.fallbackRenderer !== "local") {
+        return false;
+      }
+
+      stopAI();
+      setLocalSpeed(Number(speed.value));
+
+      try {
+        speakLocal({
+          text: item.text,
+          targetLanguage: item.targetLanguage,
+          speed: Number(speed.value),
+          onStart: onPlaying,
+          onEnd,
+          onError
+        });
+        return true;
+      } catch (error) {
+        onError(error);
+        return false;
+      }
+    };
+
     const playFresh = async () => {
       resetOtherVoiceButtons(primary);
       if (renderer === "local") {
@@ -488,14 +512,26 @@ document.addEventListener("DOMContentLoaded", () => {
 
       stopLocal();
       setAISpeed(Number(speed.value));
+      let aiFailed = false;
+
       await playAI({
         gatewayUrl: getGatewayUrl(),
         accessToken: getAccessToken(),
         text: item.text,
         targetLanguage: item.targetLanguage,
         cacheKey: item.targetLanguage + ":" + item.type + ":" + item.text,
-        onLoading, onPlaying, onEnd, onError
+        onLoading,
+        onPlaying,
+        onEnd,
+        onError: (error) => {
+          aiFailed = true;
+          console.error("AI TTS failed; trying local fallback:", error);
+        }
       });
+
+      if (aiFailed) {
+        playLocalFallback();
+      }
     };
 
     primary.addEventListener("click", async () => {

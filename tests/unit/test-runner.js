@@ -195,6 +195,47 @@
     assertEqual(flow.dispatched.normalizedInput, "今天真的 very hard，but I finished it.", "normalizedInput");
   });
 
+  test("Voice plan: Conversation AI has local fallback", function () {
+    const plan = window.BCLVoiceController.createVoicePlan({
+      mode: "conversation",
+      targetLanguage: "en",
+      speechSegments: [
+        { type: "response", text: "Hello there." }
+      ]
+    });
+
+    assertEqual(plan.length, 1, "plan length");
+    assertEqual(plan[0].renderer, "ai", "primary renderer");
+    assertEqual(plan[0].fallbackRenderer, "local", "fallback renderer");
+  });
+
+  test("Voice plan: Teaching AI item has local fallback", function () {
+    const plan = window.BCLVoiceController.createVoicePlan({
+      mode: "teaching",
+      targetLanguage: "en",
+      speechSegments: [
+        { type: "example", text: "I gave up." }
+      ]
+    });
+
+    assertEqual(plan.length, 1, "plan length");
+    assertEqual(plan[0].renderer, "ai", "primary renderer");
+    assertEqual(plan[0].fallbackRenderer, "local", "fallback renderer");
+  });
+
+  test("Voice plan: Teaching word remains local-only", function () {
+    const plan = window.BCLVoiceController.createVoicePlan({
+      mode: "teaching",
+      targetLanguage: "en",
+      speechSegments: [
+        { type: "word", text: "slog" }
+      ]
+    });
+
+    assertEqual(plan.length, 1, "plan length");
+    assertEqual(plan[0].renderer, "local", "primary renderer");
+    assertEqual(plan[0].fallbackRenderer, null, "fallback renderer");
+  });
   const passed = results.filter((r) => r.ok).length;
   const failed = results.length - passed;
 
