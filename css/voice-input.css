@@ -1,0 +1,31 @@
+/* BCL Smart Voice Input Foundation */
+
+.voice-input-notice {
+  margin: 0 0 var(--space-2);
+  padding: 0.55rem 0.7rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-small);
+  background: var(--surface-soft);
+  color: var(--muted-text);
+  font-size: 0.8rem;
+}
+
+.voice-input-notice[data-kind="error"] {
+  background: var(--error-surface);
+  border-color: var(--error-border);
+  color: var(--text);
+}
+
+.recording-state[data-state="processing"] .recording-indicator {
+  opacity: 0.45;
+}
+
+.recording-state[data-state="processing"] .recording-timer {
+  visibility: hidden;
+}
+
+.recording-action:disabled,
+#microphoneButton:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}

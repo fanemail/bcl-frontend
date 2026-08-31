@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>BCL</title>
   <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/voice-input.css">
 </head>
 
 <body>
@@ -225,25 +226,35 @@
     <section class="input-region" aria-label="Message input">
       <div id="recordingState" class="recording-state" hidden>
         <span class="recording-indicator" aria-hidden="true"></span>
-        <span class="recording-label">Recording</span>
-        <span class="recording-timer">00:00</span>
+        <span id="recordingLabel" class="recording-label">Recording</span>
+        <span id="recordingTimer" class="recording-timer">00:00</span>
 
         <button
+          id="cancelRecordingButton"
           class="recording-action"
           type="button"
-          aria-label="Cancel recording placeholder"
+          aria-label="Cancel recording"
         >
           Cancel
         </button>
 
         <button
+          id="stopRecordingButton"
           class="recording-action"
           type="button"
-          aria-label="Stop recording placeholder"
+          aria-label="Stop recording"
         >
           Stop
         </button>
       </div>
+
+      <p
+        id="voiceInputNotice"
+        class="voice-input-notice"
+        role="status"
+        aria-live="polite"
+        hidden
+      ></p>
 
       <label class="sr-only" for="messageInput">
         Message BCL
@@ -262,7 +273,8 @@
             id="microphoneButton"
             class="icon-button"
             type="button"
-            aria-label="Microphone placeholder; recording is not available yet"
+            aria-label="Start voice input"
+            aria-pressed="false"
           >
             <span aria-hidden="true">🎤</span>
           </button>
@@ -282,27 +294,23 @@
 
   </main>
 
-    <script src="js/config/learning-profile.js"></script>
+  <script src="js/config/learning-profile.js"></script>
   <script src="js/memory/reference-memory.js"></script>
-<script src="js/runtime-state.js"></script>
+  <script src="js/runtime-state.js"></script>
   <script src="js/dispatcher.js"></script>
-  
+
   <script src="js/gateway-client.js"></script>
   <script src="js/api/response-parser.js"></script>
   <script src="js/voice/voice-controller.js"></script>
   <script src="js/voice/local-tts.js"></script>
   <script src="js/voice/ai-tts.js"></script>
+
+  <script src="js/input/audio-capture.js"></script>
+  <script src="js/input/speech-to-text.js"></script>
+  <script src="js/input/speech-cleanup.js"></script>
+  <script src="js/input/gateway-stt-provider.js"></script>
+  <script src="js/input/voice-input-controller.js"></script>
+
   <script src="js/main.js"></script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
