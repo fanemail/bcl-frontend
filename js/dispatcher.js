@@ -7,20 +7,32 @@
   });
 
   function normalizeTeachingTrigger(input) {
-    const match = input.match(/^[tT](?:\s+|$)/);
+    const value = typeof input === "string" ? input : "";
 
-    if (!match) {
+    const latinMatch = value.match(/^[tT](?=$|\s|[,，:：;；.!！？?])(?:\s|[,，:：;；.!！？?])*/);
+
+    if (latinMatch) {
       return {
-        triggered: false,
-        trigger: null,
-        content: input
+        triggered: true,
+        trigger: value.charAt(0),
+        content: value.slice(latinMatch[0].length).trim()
+      };
+    }
+
+    const chineseMatch = value.match(/^(?:請教|请教)(?:\s|[,，:：;；.!！？?])*/);
+
+    if (chineseMatch) {
+      return {
+        triggered: true,
+        trigger: chineseMatch[0].replace(/[\s,，:：;；.!！？?]+$/g, ""),
+        content: value.slice(chineseMatch[0].length).trim()
       };
     }
 
     return {
-      triggered: true,
-      trigger: input.charAt(0),
-      content: input.slice(match[0].length).trim()
+      triggered: false,
+      trigger: null,
+      content: value
     };
   }
 
