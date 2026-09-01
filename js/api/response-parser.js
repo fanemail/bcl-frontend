@@ -11,6 +11,17 @@
     "example"
   ]);
 
+  const USER_STATES = new Set([
+    "OK",
+    "INPUT_UNCLEAR",
+    "RUNTIME_AMBIGUOUS",
+    "TECHNICAL_FAILURE"
+  ]);
+
+  const MODE_HINTS = new Set([
+    "teaching_possible"
+  ]);
+
   function validMode(mode) {
     return (
       mode === "conversation" ||
@@ -37,6 +48,18 @@
       }));
   }
 
+  function normalizeUserState(value) {
+    return USER_STATES.has(value)
+      ? value
+      : "OK";
+  }
+
+  function normalizeModeHint(value) {
+    return MODE_HINTS.has(value)
+      ? value
+      : null;
+  }
+
   function parseGatewayResponse(gatewayResponse, expectedMode) {
     if (
       !gatewayResponse ||
@@ -60,6 +83,12 @@
         displayContent: structuredResponse.displayContent,
         speechSegments: normalizeSpeechSegments(
           structuredResponse.speechSegments
+        ),
+        userState: normalizeUserState(
+          structuredResponse.userState
+        ),
+        modeHint: normalizeModeHint(
+          structuredResponse.modeHint
         )
       };
     }
@@ -71,7 +100,13 @@
       return {
         mode: expectedMode,
         displayContent: gatewayResponse.content,
-        speechSegments: []
+        speechSegments: [],
+        userState: normalizeUserState(
+          gatewayResponse.userState
+        ),
+        modeHint: normalizeModeHint(
+          gatewayResponse.modeHint
+        )
       };
     }
 

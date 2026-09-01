@@ -33,6 +33,12 @@ const {
 } = window.BCLSettingsController;
 
 const {
+  getTeachingReadyMessage,
+  getModeHintMessage,
+  createTechnicalFailureMessage
+} = window.BCLSystemMessages;
+
+const {
   speak: speakLocal, stop: stopLocal,
   pause: pauseLocal, resume: resumeLocal,
   replay: replayLocal, setSpeed: setLocalSpeed
@@ -869,12 +875,21 @@ document.addEventListener("DOMContentLoaded", () => {
       runtimeContext.runtime === "teaching" &&
       runtimeContext.normalizedInput.trim() === ""
     ) {
+      let sourceLanguage = "en";
+      try {
+        sourceLanguage =
+          getActiveLearningProfile().sourceLanguage;
+      } catch (error) {
+        // Keep the safe English fallback.
+      }
+
       appendMessage({
         speaker: "BCL",
         type: "ai",
         mode: "Teaching Runtime",
-        content:
-          "Teaching mode is ready. Enter a word, sentence, passage, or learning question.",
+        content: getTeachingReadyMessage(
+          sourceLanguage
+        ),
         markdown: false,
         runtimeMode: "teaching",
         speechSegments: [],
@@ -932,6 +947,30 @@ document.addEventListener("DOMContentLoaded", () => {
         targetLanguage: activeProfile.targetLanguage
       });
 
+      const effectiveModeHint =
+        parsedResponse.modeHint ||
+        (
+          parsedResponse.userState ===
+          "RUNTIME_AMBIGUOUS"
+            ? "teaching_possible"
+            : null
+        );
+
+      const modeHintMessage = getModeHintMessage(
+        effectiveModeHint,
+        activeProfile.sourceLanguage
+      );
+
+      if (modeHintMessage) {
+        appendMessage({
+          speaker: "BCL",
+          type: "ai",
+          mode: "Hint",
+          content: modeHintMessage,
+          markdown: true
+        });
+      }
+
       rememberSuccessfulTurn(
         rawValue,
         parsedResponse.displayContent
@@ -943,21 +982,25 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
 
-      const errorCode =
-        error && typeof error.code === "string"
-          ? error.code
-          : "";
+      let sourceLanguage = "en";
+      try {
+        sourceLanguage =
+          getActiveLearningProfile().sourceLanguage;
+      } catch (profileError) {
+        // Keep the safe English fallback.
+      }
+
+      const failure =
+        createTechnicalFailureMessage(
+          error,
+          sourceLanguage
+        );
 
       appendMessage({
         speaker: "BCL",
         type: "ai",
-        mode: "Gateway Error",
-        content:
-          "**Gateway Error**\n\n" +
-          error.message +
-          (errorCode
-            ? "\n\n`" + errorCode + "`"
-            : ""),
+        mode: "System",
+        content: failure.content,
         markdown: true
       });
     } finally {

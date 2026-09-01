@@ -69,23 +69,34 @@
       headers["X-BCL-Access-Token"] = accessToken;
     }
 
-    const response = await fetch(
-      gatewayUrl,
-      {
-        method: "POST",
-        headers,
-        body: JSON.stringify(runtimeRequest)
-      }
-    );
+    let response;
+
+    try {
+      response = await fetch(
+        gatewayUrl,
+        {
+          method: "POST",
+          headers,
+          body: JSON.stringify(runtimeRequest)
+        }
+      );
+    } catch (error) {
+      const gatewayError =
+        new Error("Gateway network request failed.");
+      gatewayError.code = "GATEWAY_NETWORK_FAILURE";
+      throw gatewayError;
+    }
 
     let responseData;
 
     try {
       responseData = await response.json();
     } catch (error) {
-      throw new Error(
+      const gatewayError = new Error(
         "Gateway returned an invalid response."
       );
+      gatewayError.code = "GATEWAY_INVALID_RESPONSE";
+      throw gatewayError;
     }
 
     if (
@@ -107,6 +118,13 @@
         gatewayError.code = responseData.errorCode;
       }
 
+      if (
+        responseData &&
+        typeof responseData.userState === "string"
+      ) {
+        gatewayError.userState = responseData.userState;
+      }
+
       throw gatewayError;
     }
 
@@ -114,9 +132,11 @@
       typeof responseData.content !== "string" ||
       responseData.content.trim() === ""
     ) {
-      throw new Error(
+      const gatewayError = new Error(
         "Gateway returned no content."
       );
+      gatewayError.code = "GATEWAY_EMPTY_RESPONSE";
+      throw gatewayError;
     }
 
     return responseData;
