@@ -225,6 +225,20 @@
     </div>
   </section>
 
+  <section id="learningHistoryPanel" class="modal-overlay" aria-labelledby="learningHistoryTitle" hidden>
+    <div class="modal-card learning-history-card" role="dialog" aria-modal="true">
+      <button id="learningHistoryCloseButton" class="modal-close-button" type="button" aria-label="Close Learning History">脳</button>
+      <p class="modal-eyebrow">BCL</p>
+      <h2 id="learningHistoryTitle">Learning History</h2>
+      <label class="learning-history-search-field">
+        <span class="sr-only">Search Learning History</span>
+        <input id="learningHistorySearchInput" type="search" placeholder="Search words, phrases, meanings, or context..." autocomplete="off">
+      </label>
+      <div id="learningHistoryResults" class="learning-history-results"></div>
+      <div id="learningReview" class="learning-review" hidden></div>
+    </div>
+  </section>
+
   <main class="app-shell" aria-label="BCL language learning conversation">
 
     <header class="app-header">
@@ -237,6 +251,17 @@
       </div>
 
       <div class="header-actions">
+        <button
+          id="learningSearchButton"
+          class="header-action-button"
+          type="button"
+          aria-haspopup="dialog"
+          aria-controls="learningHistoryPanel"
+          title="Learning History"
+        >
+          <span class="settings-icon" aria-hidden="true">鈱?/span>
+          <span class="sr-only">Learning History Search</span>
+        </button>
         <button
           id="settingsButton"
           class="header-action-button"
@@ -435,6 +460,8 @@
 
   <script src="js/config/learning-profile.js"></script>
   <script src="js/memory/reference-memory.js"></script>
+  <script src="js/memory/learning-history.js"></script>
+  <script src="js/search/learning-search.js"></script>
   <script src="js/runtime-state.js"></script>
   <script src="js/dispatcher.js"></script>
 
@@ -455,6 +482,7 @@
 
   <script src="js/ui/help-content.js"></script>
   <script src="js/ui/system-messages.js"></script>
+  <script src="js/ui/learning-review-controller.js"></script>
   <script src="js/ui/settings-controller.js"></script>
   <script src="js/main.js"></script>
 </body>

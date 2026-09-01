@@ -1225,3 +1225,71 @@ select:disabled {
   border-radius: 999px;
   background: var(--surface);
 }
+
+/* P8-C Teaching Review / Learning History */
+.learning-target {
+  padding: 0.05em 0.18em;
+  border-radius: 0.28em;
+  background: color-mix(in srgb, #ffe082 72%, var(--surface) 28%);
+  color: inherit;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+}
+
+.teaching-collapse-button {
+  margin-left: auto;
+  padding: 0.18rem 0.48rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--muted-text);
+  font: inherit;
+  font-size: 0.72rem;
+}
+
+.teaching-collapse-summary {
+  padding: 0.72rem 0.9rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-medium);
+  background: var(--teaching-surface);
+  color: var(--text);
+  font-size: 0.9rem;
+}
+
+.learning-history-card { width: min(100%, 680px); }
+.learning-history-search-field { display: block; margin-top: 1rem; }
+.learning-history-search-field input {
+  width: 100%; min-height: 2.75rem; padding: 0.55rem 0.75rem;
+  border: 1px solid var(--border-strong); border-radius: var(--radius-small);
+  background: var(--surface); color: var(--text); font: inherit;
+}
+.learning-history-results { display: grid; gap: 0.55rem; margin-top: 1rem; }
+.learning-history-result {
+  display: grid; gap: 0.22rem; width: 100%; padding: 0.72rem 0.8rem;
+  border: 1px solid var(--border); border-radius: var(--radius-medium);
+  background: var(--surface); color: var(--text); text-align: left; font: inherit;
+}
+.learning-history-result:hover { background: var(--surface-soft); }
+.learning-history-result span { color: var(--muted-text); font-size: 0.86rem; overflow-wrap: anywhere; }
+.learning-history-result small, .learning-review-date { color: var(--muted-text); font-size: 0.75rem; }
+.learning-history-empty { color: var(--muted-text); }
+.learning-review { margin-top: 1rem; }
+.learning-review-back {
+  padding: 0.35rem 0.6rem; border: 1px solid var(--border); border-radius: var(--radius-small);
+  background: var(--surface); color: var(--text); font: inherit;
+}
+.learning-review h3 { margin: 0.65rem 0; }
+.learning-review h4 { margin: 1.15rem 0 0.45rem; color: var(--muted-text); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.04em; }
+.learning-review-items { display: grid; gap: 0.45rem; padding-left: 1.2rem; }
+.learning-review-items li { padding-left: 0.15rem; }
+.learning-review-items span, .learning-review-items small { display: block; margin-top: 0.12rem; }
+.learning-review-items small { color: var(--muted-text); }
+.learning-review-content, .learning-review-context {
+  padding: 0.75rem; border: 1px solid var(--border); border-radius: var(--radius-medium);
+  background: var(--surface-soft); line-height: 1.6; overflow-wrap: anywhere;
+}
+
+@media (max-width: 600px) {
+  .teaching-collapse-button { font-size: 0.68rem; }
+  .learning-history-card { max-height: 90dvh; }
+}

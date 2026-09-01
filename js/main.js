@@ -38,6 +38,9 @@ const {
   createTechnicalFailureMessage
 } = window.BCLSystemMessages;
 
+const { addEntry: addLearningHistoryEntry } = window.BCLLearningHistory;
+const { enhanceTeachingCard, initializeHistoryUI } = window.BCLLearningReviewController;
+
 const {
   speak: speakLocal, stop: stopLocal,
   pause: pauseLocal, resume: resumeLocal,
@@ -601,7 +604,8 @@ document.addEventListener("DOMContentLoaded", () => {
     mode = null,
     runtimeMode = null,
     speechSegments = [],
-    targetLanguage = ""
+    targetLanguage = "",
+    learningItems = []
   }) {
     const article = document.createElement("article");
     article.className =
@@ -670,6 +674,11 @@ document.addEventListener("DOMContentLoaded", () => {
         body.appendChild(voiceRegion);
       }
     }
+
+    if (type === "ai" && runtimeMode === "teaching") {
+      enhanceTeachingCard(article, body, learningItems);
+    }
+
     return article;
   }
   function appendMessage(message) {
@@ -944,8 +953,25 @@ document.addEventListener("DOMContentLoaded", () => {
         markdown: true,
         runtimeMode: runtimeContext.runtime,
         speechSegments: parsedResponse.speechSegments,
-        targetLanguage: activeProfile.targetLanguage
+        targetLanguage: activeProfile.targetLanguage,
+        learningItems: parsedResponse.learningItems
       });
+
+      if (
+        runtimeContext.runtime === "teaching" &&
+        parsedResponse.userState === "OK"
+      ) {
+        addLearningHistoryEntry({
+          sourceLanguage: activeProfile.sourceLanguage,
+          targetLanguage: activeProfile.targetLanguage,
+          levelSystem: activeProfile.learningLevelSystem,
+          level: activeProfile.learningLevel,
+          teachingInput: runtimeContext.normalizedInput,
+          sourceContext: runtimeRequest.selectedContext,
+          displayContent: parsedResponse.displayContent,
+          learningItems: parsedResponse.learningItems
+        });
+      }
 
       const effectiveModeHint =
         parsedResponse.modeHint ||
@@ -1072,6 +1098,15 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   initializeSettings();
+
+  initializeHistoryUI({
+    history: window.BCLLearningHistory,
+    search: window.BCLLearningSearch,
+    getSourceLanguage: () => {
+      try { return getActiveLearningProfile().sourceLanguage; }
+      catch (error) { return "en"; }
+    }
+  });
 
   window.BCLTypingTranslationController.initialize({
     input: messageInput,
