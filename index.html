@@ -17,18 +17,11 @@
   >
     <div class="profile-setup-card">
       <p class="profile-setup-eyebrow">BCL Access</p>
-
-      <h2 id="accessSetupTitle">
-        Enter your access token
-      </h2>
-
-      <p>
-        Enter the BCL Access Token provided to you.
-      </p>
+      <h2 id="accessSetupTitle">Enter your access token</h2>
+      <p>Enter the BCL Access Token provided to you.</p>
 
       <label class="profile-field">
         <span>Access Token</span>
-
         <input
           id="accessTokenInput"
           type="password"
@@ -70,18 +63,13 @@
       >×</button>
 
       <p class="profile-setup-eyebrow">Learning Profile</p>
-
-      <h2 id="profileSetupTitle">
-        Set up BCL
-      </h2>
-
+      <h2 id="profileSetupTitle">Set up BCL</h2>
       <p class="profile-setup-intro">
         Choose the language you want to learn and your current level.
       </p>
 
       <label class="profile-field">
         <span>Learn</span>
-
         <select id="profileTargetLanguage">
           <option value="en">English</option>
           <option value="ja">Japanese</option>
@@ -90,7 +78,6 @@
 
       <label class="profile-field">
         <span>Level</span>
-
         <select id="profileLearningLevel"></select>
       </label>
 
@@ -117,7 +104,7 @@
     aria-labelledby="settingsTitle"
     hidden
   >
-    <div class="modal-card settings-card" role="dialog" aria-modal="true">
+    <div class="modal-card settings-card settings-card-compact" role="dialog" aria-modal="true">
       <button
         id="settingsCloseButton"
         class="modal-close-button"
@@ -128,126 +115,264 @@
       <p class="modal-eyebrow">BCL</p>
       <h2 id="settingsTitle">Settings</h2>
 
-      <div class="settings-group">
-        <h3>Learning</h3>
-        <button
-          id="settingsProfileToggle"
-          class="settings-link-button"
-          type="button"
-          aria-expanded="false"
-          aria-controls="settingsProfileInline"
-        >
-          <span>Learning Profile</span>
-          <span class="settings-chevron" aria-hidden="true">⌄</span>
-        </button>
+      <div class="compact-settings-section">
+        <div class="compact-settings-heading">Learning</div>
 
-        <div id="settingsProfileInline" class="settings-inline-panel" hidden>
-          <label class="settings-field">
-            <span>Learn</span>
-            <select id="settingsProfileTargetLanguage">
+        <div class="compact-settings-row compact-profile-row">
+          <div class="compact-settings-label">
+            <strong>Learn</strong>
+          </div>
+
+          <div class="compact-profile-controls">
+            <select
+              id="settingsProfileTargetLanguage"
+              class="compact-select"
+              aria-label="Target language"
+            >
               <option value="en">English</option>
               <option value="ja">Japanese</option>
             </select>
-          </label>
 
-          <label class="settings-field">
-            <span>Level</span>
-            <select id="settingsProfileLearningLevel"></select>
-          </label>
+            <select
+              id="settingsProfileLearningLevel"
+              class="compact-select compact-level-select"
+              aria-label="Learning level"
+            ></select>
 
-          <div class="settings-inline-actions">
-            <button id="settingsProfileSave" class="settings-save-button" type="button">Save</button>
-            <span id="settingsProfileStatus" class="settings-save-status" role="status" aria-live="polite"></span>
+            <button
+              id="settingsProfileSave"
+              class="compact-action-button"
+              type="button"
+            >Save</button>
           </div>
         </div>
 
-        <label class="settings-field settings-toggle-field">
-          <span>
+        <div
+          id="settingsProfileStatus"
+          class="compact-settings-status"
+          role="status"
+          aria-live="polite"
+        ></div>
+
+        <div class="compact-settings-row">
+          <div class="compact-settings-label">
             <strong>Typing Translation</strong>
-            <small>Translate a few useful words while you type.</small>
-          </span>
-          <select id="settingsTypingTranslation">
-            <option value="on">On</option>
-            <option value="off">Off</option>
-          </select>
-        </label>
+          </div>
+
+          <button
+            id="settingsTypingTranslation"
+            class="compact-toggle"
+            type="button"
+            role="switch"
+            aria-checked="true"
+          >
+            <span class="compact-toggle-track" aria-hidden="true">
+              <span class="compact-toggle-thumb"></span>
+            </span>
+            <span class="compact-toggle-text">On</span>
+          </button>
+        </div>
       </div>
 
-      <div class="settings-group">
-        <h3>Display</h3>
-        <label class="settings-field">
-          <span>Text size</span>
-          <select id="settingsTextSize">
-            <option value="normal">Normal</option>
-            <option value="large">Large</option>
-          </select>
-        </label>
+      <div class="compact-settings-section">
+        <div class="compact-settings-heading">Voice</div>
 
-        <label class="settings-field">
-          <span>Appearance</span>
-          <select id="settingsAppearance">
-            <option value="system">System</option>
-            <option value="light">Light</option>
-            <option value="dark">Dark</option>
-          </select>
-        </label>
+        <div class="compact-settings-row">
+          <div class="compact-settings-label">
+            <strong>Playback</strong>
+          </div>
+
+          <div
+            id="settingsPlaybackSpeed"
+            class="compact-segmented"
+            role="group"
+            aria-label="Default playback speed"
+          >
+            <button type="button" data-value="0.75">0.75×</button>
+            <button type="button" data-value="1">1×</button>
+            <button type="button" data-value="1.25">1.25×</button>
+            <button type="button" data-value="1.5">1.5×</button>
+          </div>
+        </div>
       </div>
 
-      <div class="settings-group">
-        <h3>Voice</h3>
-        <label class="settings-field">
-          <span>Default playback speed</span>
-          <select id="settingsPlaybackSpeed">
-            <option value="0.75">0.75x</option>
-            <option value="1">1x</option>
-            <option value="1.25">1.25x</option>
-            <option value="1.5">1.5x</option>
-          </select>
-        </label>
+      <div class="compact-settings-section">
+        <div class="compact-settings-heading">Display</div>
+
+        <div class="compact-settings-row">
+          <div class="compact-settings-label">
+            <strong>Text size</strong>
+          </div>
+
+          <div
+            id="settingsTextSize"
+            class="compact-segmented"
+            role="group"
+            aria-label="Text size"
+          >
+            <button type="button" data-value="normal">Normal</button>
+            <button type="button" data-value="large">Large</button>
+          </div>
+        </div>
+
+        <div class="compact-settings-row">
+          <div class="compact-settings-label">
+            <strong>Appearance</strong>
+          </div>
+
+          <div
+            id="settingsAppearance"
+            class="compact-segmented"
+            role="group"
+            aria-label="Appearance"
+          >
+            <button type="button" data-value="system">System</button>
+            <button type="button" data-value="light">Light</button>
+            <button type="button" data-value="dark">Dark</button>
+          </div>
+        </div>
       </div>
 
-      <div class="settings-group">
-        <h3>Help</h3>
+      <div class="compact-settings-section">
+        <div class="compact-settings-heading">Access</div>
+
+        <div class="compact-settings-row">
+          <div class="compact-settings-label">
+            <strong>Access Token</strong>
+          </div>
+
+          <div class="compact-token-summary">
+            <span
+              id="settingsTokenStatus"
+              class="compact-token-status"
+            >Not set</span>
+
+            <button
+              id="settingsTokenToggle"
+              class="compact-action-button"
+              type="button"
+              aria-expanded="false"
+              aria-controls="settingsTokenEditor"
+            >Add</button>
+          </div>
+        </div>
+
+        <div id="settingsTokenEditor" class="compact-token-editor" hidden>
+          <label class="sr-only" for="settingsTokenInput">New Access Token</label>
+          <input
+            id="settingsTokenInput"
+            class="compact-token-input"
+            type="password"
+            autocomplete="off"
+            spellcheck="false"
+            placeholder="New access token"
+          >
+
+          <div class="compact-token-actions">
+            <button
+              id="settingsTokenCancel"
+              class="compact-secondary-button"
+              type="button"
+            >Cancel</button>
+
+            <button
+              id="settingsTokenSave"
+              class="compact-action-button"
+              type="button"
+            >Update</button>
+          </div>
+
+          <span
+            id="settingsTokenMessage"
+            class="compact-settings-status"
+            role="status"
+            aria-live="polite"
+          ></span>
+        </div>
+      </div>
+
+      <div class="compact-settings-section compact-help-section">
         <button
           id="settingsHelpToggle"
-          class="settings-link-button"
+          class="compact-help-button"
           type="button"
           aria-expanded="false"
           aria-controls="settingsHelpInline"
         >
-          <span>How to use BCL</span>
-          <span class="settings-chevron" aria-hidden="true">⌄</span>
+          <span>
+            <span class="compact-settings-heading compact-help-heading">Help</span>
+            <strong>How to use BCL</strong>
+          </span>
+          <span class="settings-chevron" aria-hidden="true">›</span>
         </button>
-        <div id="settingsHelpInline" class="settings-inline-panel settings-help-inline" hidden>
+
+        <div
+          id="settingsHelpInline"
+          class="settings-inline-panel settings-help-inline"
+          hidden
+        >
           <div id="helpContent" class="help-content"></div>
         </div>
       </div>
     </div>
   </section>
 
-  <section id="learningHistoryPanel" class="modal-overlay" aria-labelledby="learningHistoryTitle" hidden>
+  <section
+    id="learningHistoryPanel"
+    class="modal-overlay"
+    aria-labelledby="learningHistoryTitle"
+    hidden
+  >
     <div class="modal-card learning-history-card" role="dialog" aria-modal="true">
-      <button id="learningHistoryCloseButton" class="modal-close-button" type="button" aria-label="Close Learning History">脳</button>
+      <button
+        id="learningHistoryCloseButton"
+        class="modal-close-button"
+        type="button"
+        aria-label="Close Search"
+      >×</button>
+
       <p class="modal-eyebrow">BCL</p>
-      <h2 id="learningHistoryTitle">Learning History</h2>
+      <h2 id="learningHistoryTitle">Search</h2>
+
       <label class="learning-history-search-field">
-        <span class="sr-only">Search Learning History</span>
-        <input id="learningHistorySearchInput" type="search" placeholder="Search words, phrases, meanings, or context..." autocomplete="off">
+        <span class="sr-only">Searching within this conversation only</span>
+        <input
+          id="learningHistorySearchInput"
+          type="search"
+          placeholder="Search words or phrases..."
+          autocomplete="off"
+        >
       </label>
-      <div id="learningHistoryResults" class="learning-history-results"></div>
-      <div id="learningReview" class="learning-review" hidden></div>
+
+      <div
+        id="learningHistoryResults"
+        class="learning-history-results"
+      ></div>
+
+      <div
+        id="learningReview"
+        class="learning-review"
+        hidden
+      ></div>
     </div>
   </section>
 
-  <main class="app-shell" aria-label="BCL language learning conversation">
-
+  <main
+    class="app-shell"
+    aria-label="BCL language learning conversation"
+  >
     <header class="app-header">
       <div class="product-identity">
         <div class="product-title-row">
           <h1 class="product-name">BCL</h1>
-          <span class="product-full-name">Bilingual Conversation Learning</span>
+          <span class="product-full-name">
+            Bilingual Conversation Learning
+          </span>
         </div>
-        <p class="product-tagline">Natural conversation · Contextual learning</p>
+
+        <p class="product-tagline">
+          Natural conversation · Contextual learning
+        </p>
       </div>
 
       <div class="header-actions">
@@ -257,11 +382,12 @@
           type="button"
           aria-haspopup="dialog"
           aria-controls="learningHistoryPanel"
-          title="Learning History"
+          title="Search"
         >
-          <span class="settings-icon" aria-hidden="true">鈱?/span>
-          <span class="sr-only">Learning History Search</span>
+          <span class="settings-icon" aria-hidden="true">⌕</span>
+          <span class="sr-only">Search current conversation</span>
         </button>
+
         <button
           id="settingsButton"
           class="header-action-button"
@@ -277,75 +403,26 @@
     </header>
 
     <section class="chat-region" aria-label="Conversation">
+          <section id="startupSample" class="startup-sample" aria-label="BCL in action">
+      <div class="startup-sample-inner">
+        <div class="startup-sample-kicker">BCL in action</div>
+        <article class="startup-sample-message startup-sample-user"><div class="startup-sample-meta">You</div><div class="startup-sample-bubble">川普說美國已經無條件掌控委内瑞拉650億桶原油，這一仗美國賺大發了。</div></article>
+        <article class="startup-sample-message startup-sample-bcl"><div class="startup-sample-meta">BCL · Conversation</div><div class="startup-sample-bubble">If Trump really said that, the claim sounds highly misleading. ... Even if Washington gains leverage over Venezuelan oil, turning that into actual revenue would require stable access, investment, production capacity, and international agreements. ...</div></article>
+        <article class="startup-sample-message startup-sample-user"><div class="startup-sample-meta">You</div><div class="startup-sample-bubble"><strong>t</strong> Even if Washington gains leverage over Venezuelan oil, turning that into actual revenue would require ...</div></article>
+        <article class="startup-sample-message startup-sample-teaching"><div class="startup-sample-meta">BCL · Teaching</div><div class="startup-sample-bubble"><strong>句意：</strong>即使華盛頓取得了對委內瑞拉石油的影響力，要把這種影響力真正轉化為收入，仍然需要……<div class="startup-sample-chunks"><span>gain leverage over sth</span><span>turn A into B</span><span>actual revenue</span></div></div></article>
+      </div>
+    </section>
 
-      <div id="messageList" class="message-list" tabindex="0">
-
-        <article class="message message-user">
-          <div class="message-meta">
-            <span class="speaker-label">You</span>
-          </div>
-
-          <div class="message-body">
-            Yesterday I went hiking for seven hours. We climbed about
-            1,000 meters, so I was completely exhausted when I got home.
-          </div>
-        </article>
-
-        <article class="message message-ai">
-          <div class="message-meta">
-            <span class="speaker-label">BCL</span>
-            <span class="mode-label">Conversation</span>
-          </div>
-
-          <div class="message-body">
-            <p>
-              That sounds exhausting, but also really rewarding.
-              Seven hours is a long hike, especially with a 1,000-meter climb.
-              I hope you had enough water and took a good rest afterward.
-            </p>
-
-            <button
-              class="playback-button"
-              type="button"
-              aria-label="English playback placeholder; audio is not available yet"
-              disabled
-            >
-              <span aria-hidden="true">▶</span>
-              <span>Playback</span>
-            </button>
-          </div>
-        </article>
-
-        <article class="message message-ai message-teaching">
-          <div class="message-meta">
-            <span class="speaker-label">BCL</span>
-            <span class="mode-label">Teaching</span>
-          </div>
-
-          <div class="message-body">
-            <p>
-              <strong>try to</strong> 表示「努力去做」，重點在嘗試或付出努力；
-              <strong>want to</strong> 只表示「想做」。
-            </p>
-
-            <div class="learning-example">
-              <span class="example-label">Example</span>
-              <p lang="en">
-                I tried to open the door, but it was locked.
-              </p>
-
-              <button
-                class="playback-button"
-                type="button"
-                aria-label="Example sentence playback placeholder; audio is not available yet"
-                disabled
-              >
-                <span aria-hidden="true">▶</span>
-                <span>Playback</span>
-              </button>
-            </div>
-          </div>
-        </article>
+<div
+        id="messageList"
+        class="message-list"
+        tabindex="0"
+      >
+        <!--
+          Intentionally empty at startup.
+          Real User / BCL messages are rendered by the runtime.
+          The old hiking and try-to/want-to demo conversation has been removed.
+        -->
 
         <div
           id="loadingState"
@@ -365,7 +442,6 @@
         >
           Something went wrong. Please try again.
         </div>
-
       </div>
 
       <button
@@ -376,7 +452,6 @@
       >
         <span class="scroll-arrow" aria-hidden="true">&#8595;</span>
       </button>
-
     </section>
 
     <section class="input-region" aria-label="Message input">
@@ -427,8 +502,8 @@
       <div class="input-box">
         <textarea
           id="messageInput"
-          rows="1"
-          placeholder="Message BCL..."
+          rows="3"
+          placeholder="普通會話：直接輸入中／英／日文 · 教學：頂頭輸入 t + 空格"
           aria-label="Message BCL"
         ></textarea>
 
@@ -453,9 +528,7 @@
           </button>
         </div>
       </div>
-
     </section>
-
   </main>
 
   <script src="js/config/learning-profile.js"></script>
@@ -484,6 +557,8 @@
   <script src="js/ui/system-messages.js"></script>
   <script src="js/ui/learning-review-controller.js"></script>
   <script src="js/ui/settings-controller.js"></script>
+  <script src="js/ui/startup-sample-controller.js"></script>
+  <script src="js/ui/composer-autogrow.js"></script>
   <script src="js/main.js"></script>
 </body>
 </html>

@@ -1,12 +1,19 @@
 "use strict";
 
 (function () {
+  let initialized = false;
+  let initializedApi = null;
+
   function initialize({
     input,
     hint,
     getProfile,
     isEnabled
   }) {
+    if (initialized) {
+      return initializedApi;
+    }
+
     const { detectCompletedSegment, TRIGGER_PUNCTUATION } =
       window.BCLTypingSegmentDetector;
     const { requestTypingTranslation } =
@@ -102,8 +109,6 @@
         return;
       }
 
-      // Consume before request. Automatic analysis never
-      // retries or re-analyses the same completed segment.
       consumed.add(segment.identity);
 
       let profile;
@@ -206,12 +211,6 @@
         composing = false;
         lastBeforeInput = null;
 
-        // Windows/Chrome IMEs commonly commit Chinese/Japanese
-        // punctuation as part of composition. The corresponding
-        // input event can arrive while `composing` is still true,
-        // so the normal insertText path never sees the trigger.
-        // Inspect the committed caret position after composition
-        // ends instead. The consumed registry prevents duplicates.
         queueMicrotask(
           processCurrentCaretIfCompleted
         );
@@ -295,10 +294,40 @@
       }
     );
 
-    return { clearHint };
+    initialized = true;
+    initializedApi = { clearHint };
+    return initializedApi;
   }
 
   window.BCLTypingTranslationController = {
     initialize
   };
+
+  document.addEventListener("DOMContentLoaded", () => {
+    try {
+      const input = document.getElementById("messageInput");
+      const hint = document.getElementById("typingTranslationHint");
+
+      if (
+        !input ||
+        !hint ||
+        !window.BCLLearningProfile ||
+        !window.BCLSettingsController
+      ) {
+        return;
+      }
+
+      initialize({
+        input,
+        hint,
+        getProfile: window.BCLLearningProfile.getActiveLearningProfile,
+        isEnabled: window.BCLSettingsController.getTypingTranslationEnabled
+      });
+    } catch (error) {
+      console.error(
+        "Typing Translation self-initialization failed:",
+        error
+      );
+    }
+  });
 })();

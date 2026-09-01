@@ -76,36 +76,67 @@
     const settingsButton = document.getElementById("settingsButton");
     const settingsPanel = document.getElementById("settingsPanel");
     const settingsCloseButton = document.getElementById("settingsCloseButton");
-    const settingsProfileToggle = document.getElementById("settingsProfileToggle");
-    const settingsProfileInline = document.getElementById("settingsProfileInline");
-    const settingsProfileTargetLanguage = document.getElementById("settingsProfileTargetLanguage");
-    const settingsProfileLearningLevel = document.getElementById("settingsProfileLearningLevel");
-    const settingsProfileSave = document.getElementById("settingsProfileSave");
-    const settingsProfileStatus = document.getElementById("settingsProfileStatus");
-    const settingsHelpToggle = document.getElementById("settingsHelpToggle");
-    const settingsHelpInline = document.getElementById("settingsHelpInline");
-    const settingsTextSize = document.getElementById("settingsTextSize");
-    const settingsAppearance = document.getElementById("settingsAppearance");
-    const settingsPlaybackSpeed = document.getElementById("settingsPlaybackSpeed");
-    const settingsTypingTranslation = document.getElementById("settingsTypingTranslation");
+
+    const settingsProfileTargetLanguage =
+      document.getElementById("settingsProfileTargetLanguage");
+    const settingsProfileLearningLevel =
+      document.getElementById("settingsProfileLearningLevel");
+    const settingsProfileSave =
+      document.getElementById("settingsProfileSave");
+    const settingsProfileStatus =
+      document.getElementById("settingsProfileStatus");
+
+    const settingsTypingTranslation =
+      document.getElementById("settingsTypingTranslation");
+    const settingsPlaybackSpeed =
+      document.getElementById("settingsPlaybackSpeed");
+    const settingsTextSize =
+      document.getElementById("settingsTextSize");
+    const settingsAppearance =
+      document.getElementById("settingsAppearance");
+
+    const settingsTokenStatus =
+      document.getElementById("settingsTokenStatus");
+    const settingsTokenToggle =
+      document.getElementById("settingsTokenToggle");
+    const settingsTokenEditor =
+      document.getElementById("settingsTokenEditor");
+    const settingsTokenInput =
+      document.getElementById("settingsTokenInput");
+    const settingsTokenCancel =
+      document.getElementById("settingsTokenCancel");
+    const settingsTokenSave =
+      document.getElementById("settingsTokenSave");
+    const settingsTokenMessage =
+      document.getElementById("settingsTokenMessage");
+
+    const settingsHelpToggle =
+      document.getElementById("settingsHelpToggle");
+    const settingsHelpInline =
+      document.getElementById("settingsHelpInline");
     const helpContent = document.getElementById("helpContent");
 
     const required = [
       settingsButton,
       settingsPanel,
       settingsCloseButton,
-      settingsProfileToggle,
-      settingsProfileInline,
       settingsProfileTargetLanguage,
       settingsProfileLearningLevel,
       settingsProfileSave,
       settingsProfileStatus,
-      settingsHelpToggle,
-      settingsHelpInline,
+      settingsTypingTranslation,
+      settingsPlaybackSpeed,
       settingsTextSize,
       settingsAppearance,
-      settingsPlaybackSpeed,
-      settingsTypingTranslation,
+      settingsTokenStatus,
+      settingsTokenToggle,
+      settingsTokenEditor,
+      settingsTokenInput,
+      settingsTokenCancel,
+      settingsTokenSave,
+      settingsTokenMessage,
+      settingsHelpToggle,
+      settingsHelpInline,
       helpContent
     ];
 
@@ -118,13 +149,10 @@
       setActiveLearningProfile
     } = window.BCLLearningProfile;
 
-    function syncPreferenceControls() {
-      settingsTextSize.value = preferences.textSize;
-      settingsAppearance.value = preferences.appearance;
-      settingsPlaybackSpeed.value = String(preferences.playbackSpeed);
-      settingsTypingTranslation.value =
-        preferences.typingTranslation ? "on" : "off";
-    }
+    const {
+      getAccessToken,
+      setAccessToken
+    } = window.BCLGatewayClient;
 
     function getLevels(targetLanguage) {
       return targetLanguage === "ja"
@@ -133,15 +161,18 @@
     }
 
     function fillProfileLevels(targetLanguage, selectedLevel) {
+      const levels = getLevels(targetLanguage);
       settingsProfileLearningLevel.innerHTML = "";
-      for (const level of getLevels(targetLanguage)) {
+
+      for (const level of levels) {
         const option = document.createElement("option");
         option.value = level;
         option.textContent = level;
         settingsProfileLearningLevel.appendChild(option);
       }
+
       settingsProfileLearningLevel.value =
-        selectedLevel && getLevels(targetLanguage).includes(selectedLevel)
+        selectedLevel && levels.includes(selectedLevel)
           ? selectedLevel
           : targetLanguage === "ja" ? "N3" : "B2";
     }
@@ -157,25 +188,59 @@
         profile.learningLevel;
     }
 
-    function setExpanded(button, panel, expanded) {
-      button.setAttribute("aria-expanded", String(expanded));
-      panel.hidden = !expanded;
-      const chevron = button.querySelector(".settings-chevron");
-      if (chevron) chevron.textContent = expanded ? "⌃" : "⌄";
+    function setSegmentedValue(container, value) {
+      for (const button of container.querySelectorAll("button[data-value]")) {
+        button.setAttribute(
+          "aria-pressed",
+          String(button.dataset.value === String(value))
+        );
+      }
     }
 
-    function openSettings() {
-      syncPreferenceControls();
-      syncProfileControls();
-      setExpanded(settingsProfileToggle, settingsProfileInline, false);
-      setExpanded(settingsHelpToggle, settingsHelpInline, false);
-      settingsPanel.hidden = false;
-      settingsCloseButton.focus();
+    function syncPreferenceControls() {
+      setSegmentedValue(settingsTextSize, preferences.textSize);
+      setSegmentedValue(settingsAppearance, preferences.appearance);
+      setSegmentedValue(
+        settingsPlaybackSpeed,
+        String(preferences.playbackSpeed)
+      );
+
+      settingsTypingTranslation.setAttribute(
+        "aria-checked",
+        String(preferences.typingTranslation)
+      );
+      const text = settingsTypingTranslation.querySelector(
+        ".compact-toggle-text"
+      );
+      if (text) {
+        text.textContent = preferences.typingTranslation ? "On" : "Off";
+      }
     }
 
-    function closeSettings() {
-      settingsPanel.hidden = true;
-      settingsButton.focus();
+    function syncTokenSummary() {
+      const hasToken = Boolean(getAccessToken());
+      settingsTokenStatus.textContent = hasToken ? "••••••••••••" : "Not set";
+      settingsTokenToggle.textContent = hasToken ? "Change" : "Add";
+    }
+
+    function setTokenEditorOpen(open) {
+      settingsTokenEditor.hidden = !open;
+      settingsTokenToggle.setAttribute("aria-expanded", String(open));
+      settingsTokenMessage.textContent = "";
+
+      if (!open) {
+        settingsTokenInput.value = "";
+      } else {
+        settingsTokenInput.value = "";
+        settingsTokenInput.focus();
+      }
+    }
+
+    function setHelpExpanded(expanded) {
+      settingsHelpToggle.setAttribute("aria-expanded", String(expanded));
+      settingsHelpInline.hidden = !expanded;
+      const chevron = settingsHelpToggle.querySelector(".settings-chevron");
+      if (chevron) chevron.textContent = expanded ? "⌄" : "›";
     }
 
     function updatePreference(key, value) {
@@ -185,17 +250,43 @@
       syncPreferenceControls();
     }
 
+    function openSettings() {
+      syncPreferenceControls();
+      syncProfileControls();
+      syncTokenSummary();
+      setTokenEditorOpen(false);
+      setHelpExpanded(false);
+      settingsPanel.hidden = false;
+      settingsCloseButton.focus();
+    }
+
+    function closeSettings() {
+      settingsPanel.hidden = true;
+      setTokenEditorOpen(false);
+      setHelpExpanded(false);
+      settingsButton.focus();
+    }
+
+    function bindSegmented(container, preferenceKey, parser) {
+      container.addEventListener("click", (event) => {
+        const button = event.target.closest("button[data-value]");
+        if (!button || !container.contains(button)) return;
+
+        const raw = button.dataset.value;
+        const value = parser ? parser(raw) : raw;
+        updatePreference(preferenceKey, value);
+      });
+    }
+
     settingsButton.addEventListener("click", openSettings);
     settingsCloseButton.addEventListener("click", closeSettings);
 
-    settingsProfileToggle.addEventListener("click", () => {
-      const next = settingsProfileToggle.getAttribute("aria-expanded") !== "true";
-      if (next) syncProfileControls();
-      setExpanded(settingsProfileToggle, settingsProfileInline, next);
-    });
-
     settingsProfileTargetLanguage.addEventListener("change", () => {
       fillProfileLevels(settingsProfileTargetLanguage.value, null);
+      settingsProfileStatus.textContent = "Unsaved changes";
+    });
+
+    settingsProfileLearningLevel.addEventListener("change", () => {
       settingsProfileStatus.textContent = "Unsaved changes";
     });
 
@@ -216,11 +307,13 @@
           };
 
       setActiveLearningProfile(profile);
+
       settingsProfileStatus.textContent =
         "Current: " +
         (profile.targetLanguage === "ja" ? "Japanese" : "English") +
         " · " +
         profile.learningLevel;
+
       document.dispatchEvent(
         new CustomEvent("bcl:learning-profile-changed", {
           detail: { ...profile }
@@ -228,40 +321,82 @@
       );
     });
 
+    settingsTypingTranslation.addEventListener("click", () => {
+      updatePreference(
+        "typingTranslation",
+        !preferences.typingTranslation
+      );
+
+      document.dispatchEvent(
+        new CustomEvent("bcl:typing-translation-preference-changed", {
+          detail: { enabled: preferences.typingTranslation }
+        })
+      );
+    });
+
+    bindSegmented(settingsTextSize, "textSize");
+    bindSegmented(settingsAppearance, "appearance");
+    bindSegmented(
+      settingsPlaybackSpeed,
+      "playbackSpeed",
+      (value) => Number(value)
+    );
+
+    settingsTokenToggle.addEventListener("click", () => {
+      const open = settingsTokenToggle.getAttribute("aria-expanded") === "true";
+      setTokenEditorOpen(!open);
+    });
+
+    settingsTokenCancel.addEventListener("click", () => {
+      setTokenEditorOpen(false);
+    });
+
+    settingsTokenSave.addEventListener("click", () => {
+      const token = settingsTokenInput.value.trim();
+
+      if (!token) {
+        settingsTokenMessage.textContent = "Enter a token first.";
+        settingsTokenInput.focus();
+        return;
+      }
+
+      try {
+        setAccessToken(token);
+        syncTokenSummary();
+        settingsTokenMessage.textContent = "Updated.";
+        settingsTokenInput.value = "";
+
+        window.setTimeout(() => {
+          if (!settingsTokenEditor.hidden) {
+            setTokenEditorOpen(false);
+          }
+        }, 500);
+      } catch (error) {
+        settingsTokenMessage.textContent =
+          error && error.message
+            ? error.message
+            : "Could not update token.";
+      }
+    });
+
+    settingsTokenInput.addEventListener("keydown", (event) => {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        settingsTokenSave.click();
+      }
+    });
+
     settingsHelpToggle.addEventListener("click", () => {
-      const next = settingsHelpToggle.getAttribute("aria-expanded") !== "true";
+      const next =
+        settingsHelpToggle.getAttribute("aria-expanded") !== "true";
+
       if (next) {
         const profile = getActiveLearningProfile();
         const language = profile.sourceLanguage || "zh";
         window.BCLHelpContent.renderHelpContent(helpContent, language);
       }
-      setExpanded(settingsHelpToggle, settingsHelpInline, next);
-    });
 
-    settingsTextSize.addEventListener("change", () => {
-      updatePreference("textSize", settingsTextSize.value);
-    });
-
-    settingsAppearance.addEventListener("change", () => {
-      updatePreference("appearance", settingsAppearance.value);
-    });
-
-    settingsPlaybackSpeed.addEventListener("change", () => {
-      updatePreference("playbackSpeed", Number(settingsPlaybackSpeed.value));
-    });
-
-    settingsTypingTranslation.addEventListener("change", () => {
-      updatePreference(
-        "typingTranslation",
-        settingsTypingTranslation.value === "on"
-      );
-      document.dispatchEvent(
-        new CustomEvent("bcl:typing-translation-preference-changed", {
-          detail: {
-            enabled: preferences.typingTranslation
-          }
-        })
-      );
+      setHelpExpanded(next);
     });
 
     settingsPanel.addEventListener("click", (event) => {
