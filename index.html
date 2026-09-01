@@ -60,7 +60,15 @@
     aria-labelledby="profileSetupTitle"
     hidden
   >
-    <div class="profile-setup-card">
+    <div class="profile-setup-card" role="dialog" aria-modal="true">
+      <button
+        id="profileCloseButton"
+        class="modal-close-button"
+        type="button"
+        aria-label="Close Learning Profile"
+        hidden
+      >×</button>
+
       <p class="profile-setup-eyebrow">Learning Profile</p>
 
       <h2 id="profileSetupTitle">
@@ -103,21 +111,144 @@
     </div>
   </section>
 
+  <section
+    id="settingsPanel"
+    class="modal-overlay"
+    aria-labelledby="settingsTitle"
+    hidden
+  >
+    <div class="modal-card settings-card" role="dialog" aria-modal="true">
+      <button
+        id="settingsCloseButton"
+        class="modal-close-button"
+        type="button"
+        aria-label="Close Settings"
+      >×</button>
+
+      <p class="modal-eyebrow">BCL</p>
+      <h2 id="settingsTitle">Settings</h2>
+
+      <div class="settings-group">
+        <h3>Learning</h3>
+        <button
+          id="settingsProfileToggle"
+          class="settings-link-button"
+          type="button"
+          aria-expanded="false"
+          aria-controls="settingsProfileInline"
+        >
+          <span>Learning Profile</span>
+          <span class="settings-chevron" aria-hidden="true">⌄</span>
+        </button>
+
+        <div id="settingsProfileInline" class="settings-inline-panel" hidden>
+          <label class="settings-field">
+            <span>Learn</span>
+            <select id="settingsProfileTargetLanguage">
+              <option value="en">English</option>
+              <option value="ja">Japanese</option>
+            </select>
+          </label>
+
+          <label class="settings-field">
+            <span>Level</span>
+            <select id="settingsProfileLearningLevel"></select>
+          </label>
+
+          <div class="settings-inline-actions">
+            <button id="settingsProfileSave" class="settings-save-button" type="button">Save</button>
+            <span id="settingsProfileStatus" class="settings-save-status" role="status" aria-live="polite"></span>
+          </div>
+        </div>
+
+        <label class="settings-field settings-toggle-field">
+          <span>
+            <strong>Typing Translation</strong>
+            <small>Translate a few useful words while you type.</small>
+          </span>
+          <select id="settingsTypingTranslation">
+            <option value="on">On</option>
+            <option value="off">Off</option>
+          </select>
+        </label>
+      </div>
+
+      <div class="settings-group">
+        <h3>Display</h3>
+        <label class="settings-field">
+          <span>Text size</span>
+          <select id="settingsTextSize">
+            <option value="normal">Normal</option>
+            <option value="large">Large</option>
+          </select>
+        </label>
+
+        <label class="settings-field">
+          <span>Appearance</span>
+          <select id="settingsAppearance">
+            <option value="system">System</option>
+            <option value="light">Light</option>
+            <option value="dark">Dark</option>
+          </select>
+        </label>
+      </div>
+
+      <div class="settings-group">
+        <h3>Voice</h3>
+        <label class="settings-field">
+          <span>Default playback speed</span>
+          <select id="settingsPlaybackSpeed">
+            <option value="0.75">0.75x</option>
+            <option value="1">1x</option>
+            <option value="1.25">1.25x</option>
+            <option value="1.5">1.5x</option>
+          </select>
+        </label>
+      </div>
+
+      <div class="settings-group">
+        <h3>Help</h3>
+        <button
+          id="settingsHelpToggle"
+          class="settings-link-button"
+          type="button"
+          aria-expanded="false"
+          aria-controls="settingsHelpInline"
+        >
+          <span>How to use BCL</span>
+          <span class="settings-chevron" aria-hidden="true">⌄</span>
+        </button>
+        <div id="settingsHelpInline" class="settings-inline-panel settings-help-inline" hidden>
+          <div id="helpContent" class="help-content"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <main class="app-shell" aria-label="BCL language learning conversation">
 
     <header class="app-header">
-      <div>
-        <h1 class="product-name">BCL</h1>
-        <p class="product-subtitle">Natural Conversation + Contextual Language Learning</p>
+      <div class="product-identity">
+        <div class="product-title-row">
+          <h1 class="product-name">BCL</h1>
+          <span class="product-full-name">Bilingual Conversation Learning</span>
+        </div>
+        <p class="product-tagline">Natural conversation · Contextual learning</p>
       </div>
 
-      <button
-        id="profileButton"
-        class="profile-button"
-        type="button"
-      >
-        Learning Profile
-      </button>
+      <div class="header-actions">
+        <button
+          id="settingsButton"
+          class="header-action-button"
+          type="button"
+          aria-haspopup="dialog"
+          aria-controls="settingsPanel"
+          title="Settings"
+        >
+          <span class="settings-icon" aria-hidden="true">⚙</span>
+          <span class="sr-only">Settings</span>
+        </button>
+      </div>
     </header>
 
     <section class="chat-region" aria-label="Conversation">
@@ -260,6 +391,14 @@
         Message BCL
       </label>
 
+      <div
+        id="typingTranslationHint"
+        class="typing-translation-hint"
+        role="status"
+        aria-live="polite"
+        hidden
+      ></div>
+
       <div class="input-box">
         <textarea
           id="messageInput"
@@ -310,7 +449,12 @@
   <script src="js/input/speech-cleanup.js"></script>
   <script src="js/input/gateway-stt-provider.js"></script>
   <script src="js/input/voice-input-controller.js"></script>
+  <script src="js/input/typing-segment-detector.js"></script>
+  <script src="js/input/typing-translation-client.js"></script>
+  <script src="js/input/typing-translation-controller.js"></script>
 
+  <script src="js/ui/help-content.js"></script>
+  <script src="js/ui/settings-controller.js"></script>
   <script src="js/main.js"></script>
 </body>
 </html>

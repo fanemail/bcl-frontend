@@ -27,6 +27,12 @@ const { createVoicePlan } =
   window.BCLVoiceController;
 
 const {
+  initialize: initializeSettings,
+  getPlaybackSpeed,
+  getTypingTranslationEnabled
+} = window.BCLSettingsController;
+
+const {
   speak: speakLocal, stop: stopLocal,
   pause: pauseLocal, resume: resumeLocal,
   replay: replayLocal, setSpeed: setLocalSpeed
@@ -61,8 +67,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const profileSetup =
     document.getElementById("profileSetup");
 
-  const profileButton =
-    document.getElementById("profileButton");
+  const profileCloseButton =
+    document.getElementById("profileCloseButton");
 
   const profileTargetLanguage =
     document.getElementById("profileTargetLanguage");
@@ -84,6 +90,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const microphoneButton = document.getElementById("microphoneButton");
   const sendButton = document.getElementById("sendButton");
   const messageInput = document.getElementById("messageInput");
+  const typingTranslationHint =
+    document.getElementById("typingTranslationHint");
 
   let pendingResponses = 0;
 
@@ -441,7 +449,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const option = document.createElement("option");
       option.value = String(value);
       option.textContent = value + "x";
-      if (value === 1) option.selected = true;
+      if (value === getPlaybackSpeed()) option.selected = true;
       speed.appendChild(option);
     }
 
@@ -680,7 +688,9 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
 
-  function updateProfileLevelOptions() {
+  let profileSetupDismissible = false;
+
+  function updateProfileLevelOptions(preferredLevel = "") {
     const targetLanguage =
       profileTargetLanguage.value;
 
@@ -702,9 +712,11 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     profileLearningLevel.value =
-      targetLanguage === "ja"
-        ? "N3"
-        : "B2";
+      levels.includes(preferredLevel)
+        ? preferredLevel
+        : targetLanguage === "ja"
+          ? "N3"
+          : "B2";
   }
 
   function showAccessSetup() {
@@ -745,9 +757,29 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  function showProfileSetup() {
-    updateProfileLevelOptions();
+  function showProfileSetup({ dismissible = false } = {}) {
+    profileSetupDismissible = dismissible;
+    profileCloseButton.hidden = !dismissible;
+    profileStartButton.textContent = dismissible
+      ? "Save"
+      : "Start BCL";
+
+    if (dismissible) {
+      try {
+        const profile = getActiveLearningProfile();
+        profileTargetLanguage.value = profile.targetLanguage;
+        updateProfileLevelOptions(profile.learningLevel);
+      } catch (error) {
+        profileTargetLanguage.value = "en";
+        updateProfileLevelOptions();
+      }
+    } else {
+      profileTargetLanguage.value = "en";
+      updateProfileLevelOptions();
+    }
+
     profileSetup.hidden = false;
+    profileTargetLanguage.focus();
   }
 
   function hideProfileSetup() {
@@ -761,7 +793,7 @@ document.addEventListener("DOMContentLoaded", () => {
       getActiveLearningProfile();
       hideProfileSetup();
     } catch (error) {
-      showProfileSetup();
+      showProfileSetup({ dismissible: false });
     }
   }
 
@@ -833,6 +865,24 @@ document.addEventListener("DOMContentLoaded", () => {
     messageInput.value = "";
     messageInput.focus();
 
+    if (
+      runtimeContext.runtime === "teaching" &&
+      runtimeContext.normalizedInput.trim() === ""
+    ) {
+      appendMessage({
+        speaker: "BCL",
+        type: "ai",
+        mode: "Teaching Runtime",
+        content:
+          "Teaching mode is ready. Enter a word, sentence, passage, or learning question.",
+        markdown: false,
+        runtimeMode: "teaching",
+        speechSegments: [],
+        targetLanguage: null
+      });
+      return;
+    }
+
     pendingResponses += 1;
     updateLoadingState();
 
@@ -855,8 +905,8 @@ document.addEventListener("DOMContentLoaded", () => {
         selectedContext:
           buildSelectedContext(),
 
-        rawUserInput: rawValue,
-        rawUserInstruction: rawValue
+        rawUserInput: runtimeContext.normalizedInput,
+        rawUserInstruction: runtimeContext.normalizedInput
       };
 
       const gatewayResponse =
@@ -893,13 +943,21 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
 
+      const errorCode =
+        error && typeof error.code === "string"
+          ? error.code
+          : "";
+
       appendMessage({
         speaker: "BCL",
         type: "ai",
         mode: "Gateway Error",
         content:
           "**Gateway Error**\n\n" +
-          error.message,
+          error.message +
+          (errorCode
+            ? "\n\n`" + errorCode + "`"
+            : ""),
         markdown: true
       });
     } finally {
@@ -929,20 +987,55 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   );
 
-  profileButton.addEventListener(
-    "click",
-    showProfileSetup
-  );
-
   profileTargetLanguage.addEventListener(
     "change",
-    updateProfileLevelOptions
+    () => updateProfileLevelOptions()
   );
 
   profileStartButton.addEventListener(
     "click",
     saveProfileSetup
   );
+
+  profileCloseButton.addEventListener(
+    "click",
+    () => {
+      if (profileSetupDismissible) {
+        hideProfileSetup();
+      }
+    }
+  );
+
+  profileSetup.addEventListener(
+    "click",
+    (event) => {
+      if (
+        profileSetupDismissible &&
+        event.target === profileSetup
+      ) {
+        hideProfileSetup();
+      }
+    }
+  );
+
+  document.addEventListener("keydown", (event) => {
+    if (
+      event.key === "Escape" &&
+      profileSetupDismissible &&
+      !profileSetup.hidden
+    ) {
+      hideProfileSetup();
+    }
+  });
+
+  initializeSettings();
+
+  window.BCLTypingTranslationController.initialize({
+    input: messageInput,
+    hint: typingTranslationHint,
+    getProfile: getActiveLearningProfile,
+    isEnabled: getTypingTranslationEnabled
+  });
 
   initializeAccessSetup();
   sendButton.addEventListener("click", submitMessage);
@@ -965,29 +1058,3 @@ document.addEventListener("DOMContentLoaded", () => {
 
   scrollToLatest();
 });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

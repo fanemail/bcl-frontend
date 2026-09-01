@@ -93,12 +93,21 @@
       !responseData ||
       responseData.ok !== true
     ) {
-      throw new Error(
+      const gatewayError = new Error(
         responseData &&
         typeof responseData.error === "string"
           ? responseData.error
           : "Gateway request failed."
       );
+
+      if (
+        responseData &&
+        typeof responseData.errorCode === "string"
+      ) {
+        gatewayError.code = responseData.errorCode;
+      }
+
+      throw gatewayError;
     }
 
     if (
